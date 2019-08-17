@@ -57,7 +57,7 @@ class Game(models.Model):
     gametype = models.IntegerField(choices=GAMETYPE)
     active = models.BooleanField(default=True)
     player = models.CharField(max_length=30)
-    question_index = models.IntegerField(default=0)
+    questions_answered = models.IntegerField(default=0)
     question_ids = models.TextField()
     startdatetime = models.DateTimeField(auto_now_add=True)
     enddatetime = models.DateTimeField(auto_now=True)

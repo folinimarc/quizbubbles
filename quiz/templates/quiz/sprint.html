@@ -21,26 +21,27 @@
             <template v-for="(message, index) in messages">
                 <div class="message p-3 m-1" @click="removeMessage(index)">
                     <i class="fa fa-comment mr-2"></i>
-                    [[message]]
+                    <span v-html="message"></span>
                 </div>
             </template>
         </div>
         <!-- header -->
         <div class="row text-light">
-            <div class="col-4">
+            <div class="col-3">
                 <div v-if="loading" class="stretch-out d-flex align-items-center">
                     <span class="spinner-border"></span>
                     <span class="ml-2">loading...</span>
                 </div>
             </div>
-            <div class="col-4">
-                <div class="stretch-out d-flex align-items-center">
-                    <span>Joker1</span>
-                    <span class="ml-2">Joker2</span>
-                    <span class="ml-2">Joker3</span>
-                </div>
+            <div class="col-3">
+                <span>Joker1</span>
+                <span class="ml-2">Joker2</span>
+                <span class="ml-2">Joker3</span>
             </div>
-            <div class="col-4">
+            <div class="col-3">
+                Answers: [[questionsAnswered]]
+            </div>
+            <div class="col-3">
                 <h5 id="timer">[[formattedTime()]]</h5>
             </div>
         </div>
@@ -51,16 +52,26 @@
                 <div :class="{flipped: flipShowQuestion}" class="flip-card h-200px">
                     <div class="content">
                         <!-- front question -->
-                        <div class="front interactive-card noselect bg-primary text-light p-2 center-content">
-                            <div v-if="!gameStarted">
-                                <p class="text-light">Click the question anytime to access jokers and check the timer.
-                                </p>
-                                <button @click.stop="startGame();" class="btn btn-success btn-block">Start</button>
+                        <div class="front interactive-card noselect bg-primary text-light p-2">
+                            <div v-if="timePassed==0" class="center-content stretch-out">
+                                <h3>Good luck!</h3>
+                            </div>
+                            <div v-else class="overflow-auto">
+                                <h5 v-if="correctAnswer">
+                                    Congratulations!
+                                    <button @click="nextQuestion();" class="btn btn-success">Next question</button>
+                                </h5>
+                                <h5 v-else>
+                                    Sorry, not correct!
+                                    <a href="{% url 'home' %}" class="btn btn-danger">Back to home</a>
+                                </h5>
+                                <h5>Explanation</h5>
+                                <p>[[questionExplanation]]</p>
                             </div>
                         </div>
                         <!-- back question -->
                         <div class="back interactive-card noselect bg-primary text-light p-5">
-                            <div class="question stretch-out center-content">
+                            <div class="question overflow-auto stretch-out center-content">
                                 <i class="fa fa-question"></i>
                                 <div>[[questionBody]]</div>
                             </div>
@@ -70,7 +81,7 @@
             </div>
         </div>
         <!-- answers -->
-        <div :class="{'opacity-zero': !gameStarted}" class="row my-4" @click="answerClicked();">
+        <div :class="{'opacity-zero': answersHidden}" class="row my-4" @click="answerClicked();">
             <div class="col-md-6 mb-3">
                 <div id="a" class="answer noselect p-3 d-flex flex-row justify-content-start align-items-center"
                     :class="[(chosenAnswer == 'a' ? highlightClass : 'bg-light')]">

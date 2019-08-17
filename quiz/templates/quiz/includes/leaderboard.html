@@ -1,3 +1,5 @@
+    {% load quiztags %}
+    
     <div class="table-responsive">
         <table class="table table-borderless text-center">
             <thead>
@@ -12,8 +14,8 @@
                 {% for leader in leaders %}
                 <tr>
                     <td>{{leader.player}}</td>
-                    <td>{{leader.question_index}}</td>
-                    <td>{{leader.duration}}</td>
+                    <td>{{leader.questions_answered}}</td>
+                    <td>{{leader.duration|humanize_timedelta}}</td>
                     <td>{{leader.latest_change|date:"d.m.Y"}}</td>
                 </tr>
                 {% endfor %}
