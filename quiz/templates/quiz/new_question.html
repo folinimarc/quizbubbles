@@ -1,0 +1,55 @@
+{% extends 'quiz/base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+{% load crispy_forms_field %}
+
+{% block css %}
+{% endblock %}
+
+{% block js %}
+{% endblock %}
+
+{% block content %}
+
+<form method="post">
+    {% csrf_token %}
+    <h2 class="static-card border-bottom border-light text-light my-3">1) Question and answers</h2>
+    <div class="form-row">
+        <div class="col-md-12">
+            {{ form.question|as_crispy_field }}
+        </div>
+        <div class="col-md-6">
+            {{ form.answer_a|as_crispy_field }}
+        </div>
+        <div class="col-md-6">
+            {{ form.answer_b|as_crispy_field }}
+        </div>
+        <div class="col-md-6">
+            {{ form.answer_c|as_crispy_field }}
+        </div>
+        <div class="col-md-6">
+            {{ form.answer_d|as_crispy_field }}
+        </div>
+    </div>
+    <h2 class="static-card border-bottom border-light text-light my-3">2) Correct answer, difficulty and explanation</h2>
+    <div class="form-row">
+        <div class="col-md-4">
+            {{ form.correct_answer|as_crispy_field }}
+        </div>
+        <div class="col-md-4">
+            {{ form.difficulty|as_crispy_field }}
+        </div>
+        <div class="col-md-4">
+            {{ form.author|as_crispy_field }}
+        </div>
+        <div class="col-md-12">
+            {{ form.explanation|as_crispy_field }}
+        </div>
+    </div>
+    <div class="form-row my-3">
+        <button type="submit" class="btn btn-light px-4 py-3 mr-3">Contribute question</button>
+        <a class="btn btn-secondary px-4 py-3" href="{% url 'home' %}">Cancel</a>
+    </div>
+</form>
+
+{% endblock %}

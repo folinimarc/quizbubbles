@@ -1,0 +1,26 @@
+/*
+Background effect by Manuel Pinto
+https://1stwebdesigner.com/15-css-background-effects/
+*/
+
+@keyframes gradientBG {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 49.9%;
+    }
+}
+
+body {
+    margin: 0;
+    width: 100%;
+    height: 100vh;
+    background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+    background-size: 400% 400%;
+    animation-delay: 1s;
+    animation: gradientBG 10s ease infinite;
+}

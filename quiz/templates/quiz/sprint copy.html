@@ -1,0 +1,102 @@
+{% extends 'quiz/base.html' %}
+{% load static %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'quiz/css/quiz.css' %}">
+<link rel="stylesheet" href="{% static 'quiz/css/flipcard.css' %}">
+{% endblock %}
+
+{% block js %}
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script src="{% static 'quiz/js/sprint.js' %}"></script>
+{% endblock %}
+
+
+{% block content %}
+<section id="app-wrapper" class="opacity-zero">
+    <div id="app">
+        <!-- messages -->
+        <div id="message-box">
+            <template v-for="(message, index) in messages">
+                <div class="message p-3 m-1" @click="removeMessage(index)">
+                    <i class="fa fa-comment mr-2"></i>
+                    [[message]]
+                </div>
+            </template>
+        </div>
+        <!-- quiz section -->
+        <div class="row">
+            <div class="col-12">
+                <!-- flipcard question -->
+                <div @click="flipQuestion()" :class="{flipped: questionFlipped}"
+                    class="flip-card h-200px">
+                    <div class="content">
+                        <!-- front question -->
+                        <div class="front interactive-card bg-primary text-light p-2 center-content">
+                            <div v-if="!gameStarted">
+                                <p class="text-light">Click the question anytime to access jokers and check the timer.</p>
+                                <button @click.stop="startGame();" class="btn btn-success btn-block">Start</button>
+                            </div>
+                            <div v-else-if="loading">
+                                <div class="spinner-border" role="status"></div>
+                                <span class="ml-1">loading question...</span>
+                            </div>
+                            <div v-else>
+                                <h3 id="timer">[[formattedTime()]]</h3>
+                            </div>
+                        </div>
+                        <!-- back question -->
+                        <div class="back interactive-card bg-primary text-light p-5 center-content">
+                            <div class="question noselect p-4 bg-primary d-flex align-items-center"
+                                :class="{'flex-row justify-content-start': !loading, 'justify-content-center': loading}">
+                                <template v-if="loading">
+                                    <div class="spinner-border" role="status"></div>
+                                    <span class="ml-1">loading question...</span>
+                                </template>
+                                <template v-else>
+                                    <i class="fa fa-question"></i>
+                                    <div>[[questionBody]]</div>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- answers -->
+        <div :class="{'opacity-zero': loading}" class="row my-4">
+            <div class="col-6">
+                <div id="a"
+                    class="answer noselect bg-light p-4 d-flex flex-row justify-content-start align-items-center">
+                    <div class="answer-letter">A</div>
+                    [[answerA]]
+                </div>
+            </div>
+            <div class="col-6">
+                <div id="b"
+                    class="answer noselect bg-light p-4 d-flex flex-row justify-content-start align-items-center">
+                    <div class="answer-letter">B</div>
+                    [[answerB]]
+                </div>
+            </div>
+        </div>
+        <div :class="{'opacity-zero': loading}" class="row">
+            <div class="col-6">
+                <div id="c"
+                    class="answer noselect bg-light p-4 d-flex flex-row justify-content-start align-items-center">
+                    <div class="answer-letter">C</div>
+                    [[answerC]]
+                </div>
+            </div>
+            <div id="d" class="col-6">
+                <div class="answer noselect bg-light p-4 d-flex flex-row justify-content-start align-items-center">
+                    <div class="answer-letter">D</div>
+                    [[answerD]]
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

@@ -1,0 +1,106 @@
+{% extends 'quiz/base.html' %}
+{% load static %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'quiz/css/quiz.css' %}">
+<link rel="stylesheet" href="{% static 'quiz/css/flipcard.css' %}">
+{% endblock %}
+
+{% block js %}
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script src="{% static 'quiz/js/sprint.js' %}"></script>
+{% endblock %}
+
+
+{% block content %}
+<section id="app-wrapper" class="opacity-zero">
+    <div id="app">
+        <!-- messages -->
+        <div id="message-box">
+            <template v-for="(message, index) in messages">
+                <div class="message p-3 m-1" @click="removeMessage(index)">
+                    <i class="fa fa-comment mr-2"></i>
+                    [[message]]
+                </div>
+            </template>
+        </div>
+        <!-- header -->
+        <div class="row text-light">
+            <div class="col-4">
+                <div v-if="loading" class="stretch-out d-flex align-items-center">
+                    <span class="spinner-border"></span>
+                    <span class="ml-2">loading...</span>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="stretch-out d-flex align-items-center">
+                    <span>Joker1</span>
+                    <span class="ml-2">Joker2</span>
+                    <span class="ml-2">Joker3</span>
+                </div>
+            </div>
+            <div class="col-4">
+                <h5 id="timer">[[formattedTime()]]</h5>
+            </div>
+        </div>
+        <!-- quiz section -->
+        <div class="row">
+            <div class="col-12">
+                <!-- flipcard question -->
+                <div :class="{flipped: flipShowQuestion}" class="flip-card h-200px">
+                    <div class="content">
+                        <!-- front question -->
+                        <div class="front interactive-card noselect bg-primary text-light p-2 center-content">
+                            <div v-if="!gameStarted">
+                                <p class="text-light">Click the question anytime to access jokers and check the timer.
+                                </p>
+                                <button @click.stop="startGame();" class="btn btn-success btn-block">Start</button>
+                            </div>
+                        </div>
+                        <!-- back question -->
+                        <div class="back interactive-card noselect bg-primary text-light p-5">
+                            <div class="question stretch-out center-content">
+                                <i class="fa fa-question"></i>
+                                <div>[[questionBody]]</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- answers -->
+        <div :class="{'opacity-zero': !gameStarted}" class="row my-4" @click="answerClicked();">
+            <div class="col-md-6 mb-3">
+                <div id="a" class="answer noselect p-3 d-flex flex-row justify-content-start align-items-center"
+                    :class="[(chosenAnswer == 'a' ? highlightClass : 'bg-light')]">
+                    <div class="answer-letter noevent">A</div>
+                    [[answerA]]
+                </div>
+            </div>
+            <div class="col-md-6 mb-3">
+                <div id="b" class="answer noselect p-3 d-flex flex-row justify-content-start align-items-center"
+                    :class="[(chosenAnswer == 'b' ? highlightClass : 'bg-light')]">
+                    <div class="answer-letter noevent">B</div>
+                    [[answerB]]
+                </div>
+            </div>
+            <div class="col-md-6 mb-3">
+                <div id="c" class="answer noselect p-3 d-flex flex-row justify-content-start align-items-center"
+                    :class="[(chosenAnswer == 'c' ? highlightClass : 'bg-light')]">
+                    <div class="answer-letter noevent">C</div>
+                    [[answerC]]
+                </div>
+            </div>
+            <div class="col-md-6 mb-3">
+                <div id="d" class="answer noselect p-3 d-flex flex-row justify-content-start align-items-center"
+                    :class="[(chosenAnswer == 'd' ? highlightClass : 'bg-light')]">
+                    <div class="answer-letter noevent">D</div>
+                    [[answerD]]
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

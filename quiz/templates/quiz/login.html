@@ -1,0 +1,34 @@
+{% extends 'quiz/base.html' %}
+{% load static %}
+
+{% block css %}
+{% endblock %}
+
+
+{% block js %}
+<script src="{% static 'quiz/js/login.js' %}"></script>
+{% endblock %}
+
+
+{% block content %}
+
+<div class="h-100vh d-flex justify-content-center align-items-center">
+    <div>
+        <form method="POST" onsubmit="ajax_submit_pw(); return false;">
+            {% csrf_token %}
+            <div class="form-group">
+                <div class="input-group">
+                    <input class="form-control" name="password" placeholder="Enter password" type="password">
+                    <div class="input-group-append">
+                        <button type="submit" class="btn btn-primary btn-block">Login</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+        <small id="error-message" class="error-message text-white" style="opacity:0;">The password was rejected.</small>
+    </div>
+</div>
+
+{{ js_variables|json_script:"js-variables" }}
+
+{% endblock %}

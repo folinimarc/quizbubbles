@@ -1,0 +1,22 @@
+    <div class="table-responsive">
+        <table class="table table-borderless text-center">
+            <thead>
+                <tr>
+                    <th scope="col">Name</th>
+                    <th scope="col">Answers</th>
+                    <th scope="col">Duration</th>
+                    <th scope="col">Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for leader in leaders %}
+                <tr>
+                    <td>{{leader.player}}</td>
+                    <td>{{leader.question_index}}</td>
+                    <td>{{leader.duration}}</td>
+                    <td>{{leader.latest_change|date:"d.m.Y"}}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>

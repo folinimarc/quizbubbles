@@ -1,0 +1,75 @@
+{% extends 'quiz/base.html' %}
+{% load static %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'quiz/css/flipcard.css' %}">
+{% endblock %}
+
+{% block js %}
+<script src="{% static 'quiz/js/home.js' %}"></script>
+{% endblock %}
+
+
+{% block content %}
+
+{% csrf_token %}
+<div class="row mt-5">
+    <div class="col-md-4">
+
+        <!-- Play sprint -->
+        <div class="flip-card hoverable h-200px">
+            <div class="content">
+                <div class="front interactive-card bg-primary text-light p-5 center-content">
+                    <span><i class="fa fa-hourglass"></i> Sprint</span>
+                </div>
+                <div class="back interactive-card bg-primary text-light p-3 center-content">
+                    <div>
+                        <p class="text-light">20 questions in ascending difficulty</p>
+                        <div class="form-group">
+                            <div class="input-group">
+                                <input class="form-control" name="player" placeholder="Name" type="text">
+                                <div class="input-group-append">
+                                    <button onclick="start_sprint();" class="btn btn-success btn-block">Go</button>
+                                </div>
+                            </div>
+                        </div>
+                        <small id="error-message-sprint" class="error-message text-white m-0" style="opacity:0;">Not a valid name.</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <!-- Play marathon -->
+        <a href="">
+            <div class="interactive-card bg-primary text-light p-5 center-conten">
+                <span><i class="fa fa-bicycle"></i> Marathon</span>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-4">
+        <!-- Create question -->
+        <a href="{% url 'new_question' %}">
+            <div class="interactive-card bg-success text-light p-5 center-content">
+                <span><i class="fa fa-plus"></i> Contribute</span>
+            </div>
+        </a>
+    </div>
+</div>
+<div class="row mt-5">
+    <div class="col-md-6">
+        <!-- Sprint leaderboard -->
+        <div>
+            <h2 class="border-bottom border-light text-light">Sprint Champions</h2>
+            {% include 'quiz/includes/leaderboard.html' with leaders=sprint_champions %}
+        </div>
+    </div>
+    <div class="col-md-6">
+        <!-- Marathon leaderboard -->
+        <div>
+            <h2 class="border-bottom border-light text-light">Marathon Champions</h2>
+            {% include 'quiz/includes/leaderboard.html' with leaders=marathon_champions %}
+        </div>
+    </div>
+</div>
+{% endblock %}

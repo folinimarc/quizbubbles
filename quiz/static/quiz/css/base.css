@@ -1,0 +1,79 @@
+* {
+    transition: opacity 1s;
+}
+
+#hint_id_explanation {
+    color: white !important;
+}
+
+td, th {
+    color: white;
+}
+
+label {
+    color: white;
+}
+
+a {
+    text-decoration: none !important;
+}
+
+.error-message {
+    opacity: 0;
+    transition: opacity 0.5s;
+}
+
+.opacity-zero {
+    opacity: 0;
+}
+
+.noselect {
+    -webkit-touch-callout: none; /* iOS Safari */
+      -webkit-user-select: none; /* Safari */
+       -khtml-user-select: none; /* Konqueror HTML */
+         -moz-user-select: none; /* Firefox */
+          -ms-user-select: none; /* Internet Explorer/Edge */
+              user-select: none; /* Non-prefixed version, currently
+                                    supported by Chrome and Opera */
+  }
+
+.noevent {
+    pointer-events: none;
+}
+
+.interactive-card {
+    border: 5px solid white;
+    cursor: pointer;
+}
+
+.interactive-card i {
+    font-size: 56px;
+    vertical-align: baseline;
+    transition: font-size 0.5s;
+}
+
+.h-100vh {
+    height: 100vh;
+}
+
+.h-200px {
+    height: 200px;
+}
+
+/*
+.interactive-card:hover i {
+    font-size: 76px;
+}
+*/
+
+.invalid-feedback {
+    color: yellow;
+}
+
+.center-content {
+    display: flex;
+}
+
+.center-content > * {
+    margin: auto;
+}
