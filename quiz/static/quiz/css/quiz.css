@@ -1,5 +1,4 @@
 .message {
-    cursor: pointer;
     color: white;
     background-color: rgba(0,0,0,0.8);
 }
@@ -11,20 +10,14 @@
     z-index: 10;
 }
 
-.stretch-out {
-    width: 100%;
-    height: 100%;
-}
-
-.question i {
-    font-size: 56px;
-    margin-right: 20px;
+.question {
+    margin-bottom: auto;
+    margin-top: auto;
 }
 
 .answer {
-    cursor: pointer;
     overflow-y: auto;
-    transition: background-color 0.5s, opacity 1s;
+    transition: background-color 0.25s, color 0.25s, opacity 1s;
     height: 100%;
 }
 
@@ -37,4 +30,14 @@
 
 .answer:hover .answer-letter {
     font-size: 48px;
+}
+
+.rotate-indication {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+}
+
+.rotate-indication > i {
+    font-size: 24px;
 }

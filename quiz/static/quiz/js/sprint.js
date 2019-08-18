@@ -4,19 +4,22 @@ var app = new Vue({
   delimiters: ['[[', ']]'],
   data: {
     messages: [],
+    gameStarted: false,
+    awaitingAnswer: false,
     flipShowQuestion: false,
     timePassed: 0,
     loading: true,
-    correctAnswer: false,
     answersHidden: true,
     questionBody: '',
     questionExplanation: '',
     questionsAnswered: 0,
+    questionDifficulty: '',
     answerA: '',
     answerB: '',
     answerC: '',
     answerD: '',
-    chosenAnswer: '',
+    chosenAnswer: null,
+    correctAnswer: null,
     highlightClass: 'bg-warning',
   },
   mounted() {
@@ -30,7 +33,10 @@ var app = new Vue({
     /* start game */
     setTimeout(function() {
       this.nextQuestion();
-    }.bind(this), 1000)
+      setTimeout(function() {
+        this.gameStarted = true;
+      }.bind(this), 2000);
+    }.bind(this), 1000);
   },
   methods: {
     nextQuestion: function() {
@@ -41,6 +47,7 @@ var app = new Vue({
       this.questionBody = data['questionBody'];
       this.timePassed = data['timePassed'];
       this.questionsAnswered = data['questionsAnswered'];
+      this.questionDifficulty = data['questionDifficulty'];
       this.flipShowQuestion = true;
       this.answersHidden = true;
       setTimeout(function() {
@@ -49,8 +56,17 @@ var app = new Vue({
         this.answerC = data['answerC'];
         this.answerD = data['answerD'];
         this.answersHidden = false;
+        this.awaitingAnswer = true;
+        this.chosenAnswer = null;
+        this.correctAnswer = null;
         this.startTimer();
       }.bind(this), 1000)
+    },
+    flipQuestion: function() {
+      if (this.awaitingAnswer) {
+        return;
+      }
+      this.flipShowQuestion = !this.flipShowQuestion;
     },
     addMessage: function(message) {
       this.messages.push(message);
@@ -59,9 +75,10 @@ var app = new Vue({
       this.messages.splice(index, 1);
     },
     answerClicked: function($event) {
-      if (!event.target.classList.contains('answer')) {
+      if (!event.target.classList.contains('answer') || !this.awaitingAnswer) {
         return;
       }
+      this.awaitingAnswer = false;
       this.chosenAnswer = event.target.id;
       this.stopTimer();
       this.ajaxPost({'action':'checkAnswer', 'answer': this.chosenAnswer}, this.showAnswer);
@@ -71,6 +88,29 @@ var app = new Vue({
       this.correctAnswer = data['correctAnswer'];
       this.questionExplanation = data['questionExplanation'];
       this.flipShowQuestion = false;
+    },
+    getAnswerClass: function(answer) {
+      if (this.correctAnswer == answer) {
+        return 'bg-success text-white';
+      } else if(this.chosenAnswer == answer && this.correctAnswer === null) {
+        return 'bg-warning';
+      } else if (this.chosenAnswer == answer && this.correctAnswer != answer) {
+        return 'bg-danger text-white';
+      } else {
+        return 'bg-light';
+      }
+    },
+    getQuestionClass: function() {
+      if (this.correctAnswer === null) {
+        return 'bg-primary no-pointerevents';
+      } else if (this.correctAnswer == this.chosenAnswer) {
+        return 'bg-success cursor-pointer';
+      } else {
+        return 'bg-danger cursor-pointer';
+      }
+    },
+    questionNrAndDifficulty: function() {
+      return (this.questionsAnswered + 1).toString() + ' (' + this.questionDifficulty + ')'
     },
     startTimer: function() {
       if (this.timer) {

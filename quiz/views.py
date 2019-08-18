@@ -137,6 +137,7 @@ class Sprint(View):
         if action == 'nextQuestion':
             game = self.get_current_game(game_id)
             game.helperdatetime = timezone.now()
+            game.intermezzo_state = False
             game.save()
             question = self.get_current_question(game)
             return JsonResponse({
@@ -144,6 +145,7 @@ class Sprint(View):
                 'questionBody': question.question,
                 'timePassed': game.duration,
                 'questionsAnswered': game.questions_answered,
+                'questionDifficulty': question.get_difficulty_display(),
                 'answerA': question.answer_a,
                 'answerB': question.answer_b,
                 'answerC': question.answer_c,
@@ -155,20 +157,21 @@ class Sprint(View):
             answer = payload.get('answer', None)
             timedelta = timezone.now() - game.helperdatetime
             game.duration += (timedelta.seconds - 1)
-            correctly_answered = answer == question.correct_answer
-            if correctly_answered:
+            game.intermezzo_state = True
+            if answer == question.correct_answer:
                 game.questions_answered += 1
             else:
                 game.active = False
             game.save()
             return JsonResponse({
                 'status': 'OK',
-                'correctAnswer': correctly_answered,
+                'correctAnswer': question.correct_answer,
                 'questionExplanation': question.explanation
                 })
         if action == 'closeGame':
-            game.active = False
-            game.save()
+            if not game.intermezzo_state:
+                game.active = False
+                game.save()
             return JsonResponse({
                 'status': 'OK'
             })

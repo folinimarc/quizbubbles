@@ -63,3 +63,4 @@ class Game(models.Model):
     enddatetime = models.DateTimeField(auto_now=True)
     helperdatetime = models.DateTimeField(null=True, blank=True)
     duration = models.IntegerField(default=0)
+    intermezzo_state = models.BooleanField(default=True)

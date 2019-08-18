@@ -19,7 +19,7 @@
         <!-- messages -->
         <div id="message-box">
             <template v-for="(message, index) in messages">
-                <div class="message p-3 m-1" @click="removeMessage(index)">
+                <div class="message cursor-pointer p-3 m-1" @click="removeMessage(index)">
                     <i class="fa fa-comment mr-2"></i>
                     <span v-html="message"></span>
                 </div>
@@ -49,31 +49,43 @@
         <div class="row">
             <div class="col-12">
                 <!-- flipcard question -->
-                <div :class="{flipped: flipShowQuestion}" class="flip-card h-200px">
+                <div @click="flipQuestion()" :class="{flipped: flipShowQuestion, 'cursor-pointer': !awaitingAnswer && gameStarted}" class="flip-card h-240px">
                     <div class="content">
                         <!-- front question -->
-                        <div class="front interactive-card noselect bg-primary text-light p-2">
-                            <div v-if="timePassed==0" class="center-content stretch-out">
-                                <h3>Good luck!</h3>
+                        <div class="front overflow-auto bordered noselect text-light p-4"
+                            :class="[getQuestionClass()]">
+                            <div v-if="!gameStarted" class="stretch-out d-flex justify-content-center align-items-center">
+                                <h3 class="m-0">Good luck!</h3>
                             </div>
-                            <div v-else class="overflow-auto">
-                                <h5 v-if="correctAnswer">
-                                    Congratulations!
-                                    <button @click="nextQuestion();" class="btn btn-success">Next question</button>
-                                </h5>
-                                <h5 v-else>
-                                    Sorry, not correct!
-                                    <a href="{% url 'home' %}" class="btn btn-danger">Back to home</a>
-                                </h5>
-                                <h5>Explanation</h5>
+                            <div v-else class="position-relative">
+                                <div class="rotate-indication">
+                                    <i class="material-icons">touch_app</i>
+                                    <i class="material-icons">loop</i>
+                                </div>
+                                <div v-if="chosenAnswer===correctAnswer">
+                                    <div class="d-flex justify-content-start align-items-center mb-3">
+                                            <i class="material-icons">sentiment_very_satisfied</i>
+                                        <h3 class="mx-3">Correct!</h3>
+                                        <button @click.stop="nextQuestion();" class="btn btn-primary">Next</button>
+                                    </div>
+                                </div>
+                                <div v-else>
+                                    <div class="d-flex justify-content-start align-items-center mb-2">
+                                            <i class="material-icons">sentiment_neutral</i>
+                                        <h3 class="mx-3">Oh no!</h3>
+                                        <a @click.stop="" href="{% url 'home' %}" class="btn btn-primary">New game</a>
+                                    </div>
+                                    <p>Sorry, that was not correct! Feel free to read up the explanation and give it a new try.</p>
+                                </div>
+                                <h5 class="border-bottom border-light">Explanation</h5>
                                 <p>[[questionExplanation]]</p>
                             </div>
                         </div>
                         <!-- back question -->
-                        <div class="back interactive-card noselect bg-primary text-light p-5">
-                            <div class="question overflow-auto stretch-out center-content">
-                                <i class="fa fa-question"></i>
-                                <div>[[questionBody]]</div>
+                        <div class="back bordered noselect bg-primary text-light p-4 overflow-auto d-flex">
+                            <div class="stretch-out question">
+                                <h3>Question [[questionNrAndDifficulty()]]</h3>
+                                <p>[[questionBody]]</p>
                             </div>
                         </div>
                     </div>
@@ -83,29 +95,29 @@
         <!-- answers -->
         <div :class="{'opacity-zero': answersHidden}" class="row my-4" @click="answerClicked();">
             <div class="col-md-6 mb-3">
-                <div id="a" class="answer noselect p-3 d-flex flex-row justify-content-start align-items-center"
-                    :class="[(chosenAnswer == 'a' ? highlightClass : 'bg-light')]">
+                <div id="a" class="answer noselect p-3 d-flex justify-content-start align-items-center"
+                    :class="[getAnswerClass('a'), (awaitingAnswer ? 'cursor-pointer': 'no-pointerevents')]">
                     <div class="answer-letter noevent">A</div>
                     [[answerA]]
                 </div>
             </div>
             <div class="col-md-6 mb-3">
-                <div id="b" class="answer noselect p-3 d-flex flex-row justify-content-start align-items-center"
-                    :class="[(chosenAnswer == 'b' ? highlightClass : 'bg-light')]">
+                <div id="b" class="answer noselect p-3 d-flex justify-content-start align-items-center"
+                    :class="[getAnswerClass('b'), (awaitingAnswer ? 'cursor-pointer': 'no-pointerevents')]">
                     <div class="answer-letter noevent">B</div>
                     [[answerB]]
                 </div>
             </div>
             <div class="col-md-6 mb-3">
-                <div id="c" class="answer noselect p-3 d-flex flex-row justify-content-start align-items-center"
-                    :class="[(chosenAnswer == 'c' ? highlightClass : 'bg-light')]">
+                <div id="c" class="answer noselect p-3 d-flex justify-content-start align-items-center"
+                    :class="[getAnswerClass('c'), (awaitingAnswer ? 'cursor-pointer': 'no-pointerevents')]">
                     <div class="answer-letter noevent">C</div>
                     [[answerC]]
                 </div>
             </div>
             <div class="col-md-6 mb-3">
-                <div id="d" class="answer noselect p-3 d-flex flex-row justify-content-start align-items-center"
-                    :class="[(chosenAnswer == 'd' ? highlightClass : 'bg-light')]">
+                <div id="d" class="answer noselect p-3 d-flex justify-content-start align-items-center"
+                    :class="[getAnswerClass('d'), (awaitingAnswer ? 'cursor-pointer': 'no-pointerevents')]">
                     <div class="answer-letter noevent">D</div>
                     [[answerD]]
                 </div>
