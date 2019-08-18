@@ -48,10 +48,10 @@ class Home(View):
         ctx = {}
         ctx['sprint_champions'] = Game.objects\
             .filter(active=False, gametype=Game.SPRINT)\
-            .order_by('-questions_answered', '-duration')[:5]
+            .order_by('-questions_answered', 'duration')[:5]
         ctx['marathon_champions'] = Game.objects\
             .filter(active=False, gametype=Game.MARATHON)\
-            .order_by('-questions_answered')[:5]
+            .order_by('-questions_answered', 'duration')[:5]
         return render(request, 'quiz/home.html', ctx)
 
     def post(self, request):
@@ -109,12 +109,20 @@ class Sprint(View):
         question_pk = int(game.question_ids.split(',')[game.questions_answered])
         return get_object_or_404(Question, pk=question_pk)
 
+    def get_ranking(self, game):
+        outperform_questions = Game.objects.filter(active=False, questions_answered__gt=game.questions_answered).count()
+        outperform_time = Game.objects.filter(active=False, questions_answered=game.questions_answered, duration__lt=game.duration).count()
+        rank = outperform_questions + outperform_time + 1
+        print(outperform_questions)
+        print(outperform_time)
+        print(rank)
+
     def get(self, request):
         ctx = {}
         return render(request, 'quiz/sprint.html', ctx)
 
     def post(self, request):
-        time.sleep(0.5)
+        #time.sleep(0.5)
         payload = json.loads(request.body)
         action = payload.get('action', None)
         game_id = request.session.get('gameid', None)
@@ -161,6 +169,7 @@ class Sprint(View):
             if answer == question.correct_answer:
                 game.questions_answered += 1
             else:
+                self.get_ranking(game)
                 game.active = False
             game.save()
             return JsonResponse({
