@@ -4,20 +4,27 @@ var app = new Vue({
   delimiters: ['[[', ']]'],
   data: {
     messages: [],
+    errorOccured: false,
     gameStarted: false,
-    awaitingAnswer: false,
+    gameActive: true,
+    awaitingAnswer: true,
     flipShowQuestion: false,
     timePassed: 0,
     loading: true,
+    gamesTotal: 0,
+    rank: 0,
+    gametype: '',
     answersHidden: true,
     questionBody: '',
     questionExplanation: '',
     questionsAnswered: 0,
+    questionsTotal: 0,
     questionDifficulty: '',
     answerA: '',
     answerB: '',
     answerC: '',
     answerD: '',
+    questionHeader: '',
     chosenAnswer: null,
     correctAnswer: null,
     highlightClass: 'bg-warning',
@@ -32,7 +39,7 @@ var app = new Vue({
     document.getElementById('app-wrapper').classList.remove('opacity-zero');
     /* start game */
     setTimeout(function() {
-      this.nextQuestion();
+      this.getGameData();
       setTimeout(function() {
         this.gameStarted = true;
       }.bind(this), 2000);
@@ -45,11 +52,10 @@ var app = new Vue({
     startNewRound: function(response) {
       const data = response.data;
       this.questionBody = data['questionBody'];
-      this.timePassed = data['timePassed'];
-      this.questionsAnswered = data['questionsAnswered'];
       this.questionDifficulty = data['questionDifficulty'];
-      this.flipShowQuestion = true;
+      this.questionHeader =  'Question ' + (this.questionsAnswered + 1).toString() + ' (' + this.questionDifficulty + ')';
       this.answersHidden = true;
+      this.flipShowQuestion = true;
       setTimeout(function() {
         this.answerA = data['answerA'];
         this.answerB = data['answerB'];
@@ -61,6 +67,18 @@ var app = new Vue({
         this.correctAnswer = null;
         this.startTimer();
       }.bind(this), 1000)
+    },
+    getGameData: function() {
+      this.ajaxPost({'action':'getGameData'}, function(response) {
+        const data = response.data;
+        this.timePassed = data['timePassed'];
+        this.gamesTotal = data['gamesTotal'];
+        this.gametype = data['gametype'];
+        this.rank = data['rank'];
+        this.questionsAnswered = data['questionsAnswered'];
+        this.questionsTotal = data['questionsTotal'];
+        this.nextQuestion();
+      }.bind(this));
     },
     flipQuestion: function() {
       if (this.awaitingAnswer) {
@@ -81,11 +99,15 @@ var app = new Vue({
       this.awaitingAnswer = false;
       this.chosenAnswer = event.target.id;
       this.stopTimer();
-      this.ajaxPost({'action':'checkAnswer', 'answer': this.chosenAnswer}, this.showAnswer);
+      this.ajaxPost({'action':'checkAnswer', 'answer': this.chosenAnswer}, this.checkAnswer);
     },
-    showAnswer: function(response) {
+    checkAnswer: function(response) {
       const data = response.data;
+      this.timePassed = data['timePassed'];
       this.correctAnswer = data['correctAnswer'];
+      this.rank = data['rank'];
+      this.gameActive = data['gameActive'];
+      this.questionsAnswered = data['questionsAnswered'];
       this.questionExplanation = data['questionExplanation'];
       this.flipShowQuestion = false;
     },
@@ -102,15 +124,12 @@ var app = new Vue({
     },
     getQuestionClass: function() {
       if (this.correctAnswer === null) {
-        return 'bg-primary no-pointerevents';
+        return 'bg-primary';
       } else if (this.correctAnswer == this.chosenAnswer) {
         return 'bg-success cursor-pointer';
       } else {
         return 'bg-danger cursor-pointer';
       }
-    },
-    questionNrAndDifficulty: function() {
-      return (this.questionsAnswered + 1).toString() + ' (' + this.questionDifficulty + ')'
     },
     startTimer: function() {
       if (this.timer) {
@@ -131,24 +150,33 @@ var app = new Vue({
       return minutes.toString() + ':' + padding + seconds.toString();
     },
     handleLeave: function() {
-      this.ajaxPost({'action':'closeGame'}, function(response) {});
+      if (this.gameActive) {
+        this.ajaxPost({'action':'closeGame'}, function(response) {});
+      }
+    },
+    handleError: function(errorMsg) {
+      this.errorOccured = true;
+      this.loading = false;
+      this.awaitingAnswer = true;
+      this.flipShowQuestion = false;
+      this.addMessage(errorMsg);
     },
     ajaxPost: function(data, successCallback, url='') {
       this.loading = true;
       axios.post(url, data)
       .then(function(response) {
           this.loading = false;
-          if (response.data.message) {
-            this.addMessage(response.data.message);
+          if (response.data.status === 'ERROR') {
+            this.handleError(response.data.message);
           }
           if (response.data.status === 'OK') {
             successCallback(response);
+            if (response.data.message) {
+              this.addMessage(response.data.message);
+            }
           }
         }.bind(this))
-      .catch(function(error) {
-        this.loading = false;
-        this.addMessage('An unexpected error occured. Please report this. Error message: "' + error + '"');
-      }.bind(this));
+      .catch(this.handleError);
     },
   }
 })

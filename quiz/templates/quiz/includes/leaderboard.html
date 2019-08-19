@@ -1,22 +1,24 @@
     {% load quiztags %}
     
-    <div class="table-responsive">
+    <div class="table-responsive mb-3">
         <table class="table table-borderless text-center">
             <thead>
                 <tr>
+                    <th scope="col">Rank</th>
                     <th scope="col">Name</th>
                     <th scope="col">Answers</th>
-                    <th scope="col">Duration</th>
+                    <th scope="col">Time</th>
                     <th scope="col">Date</th>
                 </tr>
             </thead>
             <tbody>
                 {% for leader in leaders %}
                 <tr>
+                    <th scope="row">{{forloop.counter}}</th>
                     <td>{{leader.player}}</td>
                     <td>{{leader.questions_answered}}</td>
                     <td>{{leader.duration|humanize_timedelta}}</td>
-                    <td>{{leader.latest_change|date:"d.m.Y"}}</td>
+                    <td>{{leader.enddatetime|date:"d.m.y"}}</td>
                 </tr>
                 {% endfor %}
             </tbody>

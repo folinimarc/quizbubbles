@@ -8,7 +8,7 @@ class QuestionAdmin(admin.ModelAdmin):
         models.TextField: {'widget': widgets.Textarea(attrs={'rows':4, 'cols': 40})},
     }
 
-    list_display = ('pk', 'trimmed_question', 'difficulty', 'author')
+    list_display = ('pk', 'trimmed_question', 'difficulty', 'contributor')
 
     fieldsets = (
         ('Define question and answers', {

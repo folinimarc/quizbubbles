@@ -9,7 +9,7 @@
 {% block js %}
 <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
 <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-<script src="{% static 'quiz/js/sprint.js' %}"></script>
+<script src="{% static 'quiz/js/quiz.js' %}"></script>
 {% endblock %}
 
 
@@ -20,29 +20,32 @@
         <div id="message-box">
             <template v-for="(message, index) in messages">
                 <div class="message cursor-pointer p-3 m-1" @click="removeMessage(index)">
-                    <i class="fa fa-comment mr-2"></i>
+                    <i class="material-icons mr-2">message</i>
                     <span v-html="message"></span>
                 </div>
             </template>
         </div>
         <!-- header -->
-        <div class="row text-light">
-            <div class="col-3">
-                <div v-if="loading" class="stretch-out d-flex align-items-center">
+        <div class="row text-light my-3 d-flex justify-content-between">
+            <div class="col-sm-2 text-center">
+                <h5 class="m-0">[[gametype]]</h5>
+            </div>
+            <div class="col-sm-2">
+                <div :class="{'opacity-zero': !loading}" class="stretch-out d-flex align-items-center justify-content-center">
                     <span class="spinner-border"></span>
                     <span class="ml-2">loading...</span>
                 </div>
             </div>
-            <div class="col-3">
+            <div class="col-sm-4 d-flex align-items-center justify-content-center">
                 <span>Joker1</span>
                 <span class="ml-2">Joker2</span>
                 <span class="ml-2">Joker3</span>
             </div>
-            <div class="col-3">
-                Answers: [[questionsAnswered]]
+            <div class="col-sm-2 d-flex align-items-center justify-content-center">
+                [[questionsAnswered]]/[[questionsTotal]] | Rank: [[rank]]
             </div>
-            <div class="col-3">
-                <h5 id="timer">[[formattedTime()]]</h5>
+            <div class="col-sm-2 d-flex align-items-center justify-content-center">
+                <h5 id="timer" class="m-0">[[formattedTime()]]</h5>
             </div>
         </div>
         <!-- quiz section -->
@@ -54,29 +57,43 @@
                         <!-- front question -->
                         <div class="front overflow-auto bordered noselect text-light p-4"
                             :class="[getQuestionClass()]">
-                            <div v-if="!gameStarted" class="stretch-out d-flex justify-content-center align-items-center">
+                            <div v-if="!gameStarted && !errorOccured" class="stretch-out d-flex justify-content-center align-items-center">
                                 <h3 class="m-0">Good luck!</h3>
                             </div>
-                            <div v-else class="position-relative">
-                                <div class="rotate-indication">
-                                    <i class="material-icons">touch_app</i>
-                                    <i class="material-icons">loop</i>
+                            <!-- display error -->
+                            <div v-if="errorOccured" class="stretch-out d-flex align-items-center justify-content-center flex-column">
+                                <div class="d-flex align-items-center justify-content-center">
+                                    <i class="material-icons d-block">mood_bad</i>
+                                    <h3 class="my-2">Oh no, something went wrong!</h3>
                                 </div>
-                                <div v-if="chosenAnswer===correctAnswer">
-                                    <div class="d-flex justify-content-start align-items-center mb-3">
-                                            <i class="material-icons">sentiment_very_satisfied</i>
-                                        <h3 class="mx-3">Correct!</h3>
-                                        <button @click.stop="nextQuestion();" class="btn btn-primary">Next</button>
-                                    </div>
+                                <a @click.stop="" href="{% url 'home' %}" class="btn btn-success d-inline-block">Restart</a>
+                            </div>
+                            <div v-if="gameStarted && !errorOccured">
+                                <!-- display SUCCESS -->
+                                <div class="d-flex justify-content-start align-items-center mb-3">
+                                    <template v-if="chosenAnswer===correctAnswer">
+                                        <i class="material-icons">sentiment_very_satisfied</i>
+                                        <template v-if="gameActive">
+                                            <h3 class="mb-0 mr-4">Correct!</h3>
+                                            <button @click.stop="nextQuestion();" class="btn btn-primary">Next question</button>
+                                        </template>
+                                        <template v-else>
+                                            <h3 class="mb-0 mr-4">You did it!</h3>
+                                            <a @click.stop="" href="{% url 'home' %}" class="btn btn-primary">Restart</a>
+                                        </template>
+                                    </template>
+                                    <template v-else>
+                                        <i class="material-icons">sentiment_very_dissatisfied</i>
+                                        <h3 class="mb-0 mr-4">Game over!</h3>
+                                        <a @click.stop="" href="{% url 'home' %}" class="btn btn-primary">Restart</a>
+                                    </template>
                                 </div>
-                                <div v-else>
-                                    <div class="d-flex justify-content-start align-items-center mb-2">
-                                            <i class="material-icons">sentiment_neutral</i>
-                                        <h3 class="mx-3">Oh no!</h3>
-                                        <a @click.stop="" href="{% url 'home' %}" class="btn btn-primary">New game</a>
-                                    </div>
-                                    <p>Sorry, that was not correct! Feel free to read up the explanation and give it a new try.</p>
-                                </div>
+                                <p v-if="questionsAnswered==1 && gameActive"><b>Hint:</b> Click here to view question again.</p>
+                                <p v-if="questionsAnswered==2 && gameActive"><b>Hint:</b> The explanation below may contain interesting additional information. </p>
+                                <p v-if="questionsAnswered==3 && gameActive"><b>Hint:</b> Take a break, the timer is currently halted.</p>
+                                <p v-if="questionsAnswered==4 && gameActive"><b>Hint:</b> Don't forget you jokers.</p>
+                                <p v-if="questionsAnswered==5 && gameActive"><b>Hint:</b> The game ends immediately upon either closing the browser or even reloading the page while answering a question.</p>
+                                <p v-if="!gameActive">You've successfully answered [[questionsAnswered]] questions in [[formattedTime()]]. <b>This ranks your game [[rank]] out of [[gamesTotal]] total!</b></p>
                                 <h5 class="border-bottom border-light">Explanation</h5>
                                 <p>[[questionExplanation]]</p>
                             </div>
@@ -84,7 +101,7 @@
                         <!-- back question -->
                         <div class="back bordered noselect bg-primary text-light p-4 overflow-auto d-flex">
                             <div class="stretch-out question">
-                                <h3>Question [[questionNrAndDifficulty()]]</h3>
+                                <h3>[[questionHeader]]</h3>
                                 <p>[[questionBody]]</p>
                             </div>
                         </div>

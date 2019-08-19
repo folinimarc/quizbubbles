@@ -1,15 +1,3 @@
-.message {
-    color: white;
-    background-color: rgba(0,0,0,0.8);
-}
-
-#message-box {
-    position: fixed;
-    top: 0px;
-    left: 0px;
-    z-index: 10;
-}
-
 .question {
     margin-bottom: auto;
     margin-top: auto;
@@ -30,14 +18,4 @@
 
 .answer:hover .answer-letter {
     font-size: 48px;
-}
-
-.rotate-indication {
-    position: absolute;
-    top: 0px;
-    right: 0px;
-}
-
-.rotate-indication > i {
-    font-size: 24px;
 }

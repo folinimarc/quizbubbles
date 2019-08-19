@@ -7,10 +7,24 @@
 {% endblock %}
 
 {% block js %}
+<script src="{% static 'quiz/js/messages.js' %}"></script>
 {% endblock %}
 
 {% block content %}
 
+<!-- messages -->
+<div class="row">
+    <div id="message-box">
+        {% for message in messages %}
+        <div class="message cursor-pointer p-3 m-1">
+            <i class="no-pointerevents material-icons mr-2">message</i>
+            <span class="no-pointerevents">{{message}}</span>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- question form -->
 <form method="post">
     {% csrf_token %}
     <h2 class="static-card border-bottom border-light text-light my-3">1) Question and answers</h2>
@@ -40,7 +54,7 @@
             {{ form.difficulty|as_crispy_field }}
         </div>
         <div class="col-md-4">
-            {{ form.author|as_crispy_field }}
+            {{ form.contributor|as_crispy_field }}
         </div>
         <div class="col-md-12">
             {{ form.explanation|as_crispy_field }}

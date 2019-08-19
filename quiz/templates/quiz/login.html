@@ -6,15 +6,15 @@
 
 
 {% block js %}
+<script src="{% static 'quiz/js/ajax.js' %}"></script>
 <script src="{% static 'quiz/js/login.js' %}"></script>
 {% endblock %}
 
 
 {% block content %}
-
 <div class="h-100vh d-flex justify-content-center align-items-center">
     <div>
-        <form method="POST" onsubmit="ajax_submit_pw(); return false;">
+        <form method="POST" onsubmit="submit_pw(); return false;">
             {% csrf_token %}
             <div class="form-group">
                 <div class="input-group">
@@ -25,10 +25,7 @@
                 </div>
             </div>
         </form>
-        <small id="error-message" class="error-message text-white" style="opacity:0;">The password was rejected.</small>
+        <small id="error-message-login" class="error-message text-white" style="opacity:0;"></small>
     </div>
 </div>
-
-{{ js_variables|json_script:"js-variables" }}
-
 {% endblock %}

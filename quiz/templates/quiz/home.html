@@ -6,6 +6,8 @@
 {% endblock %}
 
 {% block js %}
+<script src="{% static 'quiz/js/messages.js' %}"></script>
+<script src="{% static 'quiz/js/ajax.js' %}"></script>
 <script src="{% static 'quiz/js/home.js' %}"></script>
 {% endblock %}
 
@@ -13,21 +15,32 @@
 {% block content %}
 
 {% csrf_token %}
-<div class="row mt-5">
-    <div class="col-md-4">
+<!-- messages -->
+<div class="row">
+    <div id="message-box">
+        {% for message in messages %}
+        <div class="message cursor-pointer p-3 m-1">
+            <i class="no-pointerevents material-icons mr-2">message</i>
+            <span class="no-pointerevents">{{message}}</span>
+        </div>
+        {% endfor %}
+    </div>
+</div>
 
+<div class="row mt-5">
+    <div class="col-md-4 mb-3">
         <!-- Play sprint -->
         <div class="flip-card hoverable h-200px">
             <div class="content">
                 <div class="front bordered cursor-pointer bg-primary text-light p-5 d-flex justify-content-center align-items-center">
-                    <span><i class="material-icons">directions_run</i> Sprint</span>
+                    <span><i class="material-icons">directions_run</i>Sprint</span>
                 </div>
                 <div class="back bordered cursor-pointer bg-primary text-light p-3 d-flex justify-content-center align-items-center">
                     <div>
-                        <p class="text-light">20 questions in ascending difficulty</p>
+                        <p class="text-light">{{nr_sprint_questions}} questions in ascending difficulty. Go for it!</p>
                         <div class="form-group">
                             <div class="input-group">
-                                <input class="form-control" name="player" placeholder="Name" type="text">
+                                <input class="form-control" name="player-sprint" placeholder="Name" type="text">
                                 <div class="input-group-append">
                                     <button onclick="start_sprint();" class="btn btn-success btn-block">Go</button>
                                 </div>
@@ -39,34 +52,58 @@
             </div>
         </div>
     </div>
-    <div class="col-md-4">
+    <div class="col-md-4 mb-3">
         <!-- Play marathon -->
-        <a href="">
-            <div class="bordered cursor-pointer bg-primary text-light p-5 center-conten">
-                <span><i class="material-icons">directions_bike</i> Marathon</span>
+        <div class="flip-card hoverable h-200px">
+            <div class="content">
+                <div class="front bordered cursor-pointer bg-primary text-light p-5 d-flex justify-content-center align-items-center">
+                    <span><i class="material-icons">directions_bike</i> Marathon</span>
+                </div>
+                <div class="back bordered cursor-pointer bg-primary text-light p-3 d-flex justify-content-center align-items-center">
+                    <div>
+                        <p class="text-light">All questions ({{nr_marathon_questions}}) in random order. Good luck!</p>
+                        <div class="form-group">
+                            <div class="input-group">
+                                <input class="form-control" name="player-marathon" placeholder="Name" type="text">
+                                <div class="input-group-append">
+                                    <button onclick="start_marathon();" class="btn btn-success btn-block">Go</button>
+                                </div>
+                            </div>
+                        </div>
+                        <small id="error-message-marathon" class="error-message text-white m-0" style="opacity:0;"></small>
+                    </div>
+                </div>
             </div>
-        </a>
+        </div>
     </div>
-    <div class="col-md-4">
-        <!-- Create question -->
-        <a href="{% url 'new_question' %}">
-            <div class="bordered cursor-pointer bg-success text-light p-5 d-flex justify-content-center align-items-center">
-                <span><i class="material-icons">add_circle_outline</i> Contribute</span>
+    <div class="col-md-4 mb-3">
+        <!-- Contribute question -->
+        <div class="flip-card hoverable h-200px">
+            <div class="content">
+                <div class="front bordered cursor-pointer bg-success text-light p-5 d-flex justify-content-center align-items-center">
+                    <span><i class="material-icons">add_circle_outline</i>Contribute</span>
+                </div>
+                <div class="back bordered cursor-pointer bg-success text-light p-3 d-flex justify-content-center align-items-center">
+                    <div>
+                        <p class="text-light">Add a new question</p>
+                        <a href="{% url 'new_question' %}" class="btn btn-primary btn-block">Contribute</a>
+                    </div>
+                </div>
             </div>
-        </a>
+        </div>
     </div>
 </div>
-<div class="row mt-5">
+<div class="row my-5">
     <div class="col-md-6">
         <!-- Sprint leaderboard -->
-        <div>
+        <div class="px-2">
             <h2 class="border-bottom border-light text-light">Sprint Champions</h2>
             {% include 'quiz/includes/leaderboard.html' with leaders=sprint_champions %}
         </div>
     </div>
     <div class="col-md-6">
         <!-- Marathon leaderboard -->
-        <div>
+        <div class="px-2">
             <h2 class="border-bottom border-light text-light">Marathon Champions</h2>
             {% include 'quiz/includes/leaderboard.html' with leaders=marathon_champions %}
         </div>

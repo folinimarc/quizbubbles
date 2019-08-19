@@ -1,13 +1,26 @@
 * {
-    transition: opacity 1s;
+    transition: opacity 750ms;
 }
 
 #hint_id_explanation {
     color: white !important;
 }
 
+.message {
+    color: white;
+    background-color: rgba(0,0,0,0.8);
+}
+
+#message-box {
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    z-index: 10;
+}
+
 td, th {
     color: white;
+    font-size: 0.85em;
 }
 
 label {

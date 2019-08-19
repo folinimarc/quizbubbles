@@ -124,6 +124,7 @@ STATIC_URL = '/static/'
 # QUIZ APP
 PASSWORD = 'cd'
 SPRINT_NR_QUESTIONS_PER_DIFFICULTY = 5
+NR_LEADERBOARD_ENTRIES_TO_SHOW = 5
 
 # crispy forms template pack
 CRISPY_TEMPLATE_PACK = 'bootstrap4'

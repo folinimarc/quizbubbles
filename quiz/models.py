@@ -37,7 +37,7 @@ class Question(models.Model):
     correct_answer = models.CharField(max_length=1, choices=ANSWERS)
     difficulty = models.IntegerField(choices=DIFFICULTIES)
     explanation = models.TextField(help_text='Provide some more context about the right answer and maybe frame it in the larger picture of the other answers. This explanation will be displayed after an answer was picked, irrepective of whether the right or wrong answer was chosen.')
-    author = models.CharField(max_length=255)
+    contributor = models.CharField(max_length=255)
 
     def trimmed_question(self):
         return f'{self.question[:10]}...' if len(self.question) > 10 else str(self.question)
@@ -56,8 +56,9 @@ class Game(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4)
     gametype = models.IntegerField(choices=GAMETYPE)
     active = models.BooleanField(default=True)
-    player = models.CharField(max_length=30)
+    player = models.CharField(max_length=10)
     questions_answered = models.IntegerField(default=0)
+    questions_total = models.IntegerField(default=0)
     question_ids = models.TextField()
     startdatetime = models.DateTimeField(auto_now_add=True)
     enddatetime = models.DateTimeField(auto_now=True)

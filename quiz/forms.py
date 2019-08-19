@@ -24,7 +24,13 @@ class QuestionModelForm(forms.ModelForm):
         }
 
 
-class GamePlayernameGametypeForm(forms.ModelForm):
+class FormErrorsMixin:
+    def get_form_errors_as_string(self):
+        if not self.cleaned_data:
+            self.is_valid()
+        return ' '.join([' '.join(x for x in l) for l in list(self.errors.values())])
+
+class GamePlayernameGametypeForm(FormErrorsMixin, forms.ModelForm):
     class Meta:
         model = Game
         fields = ('player', 'gametype')
