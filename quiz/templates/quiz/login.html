@@ -30,10 +30,10 @@
                         {{ join_form|crispy }}
                         <div class="form-row">
                             <div class="p-1 w-50">
-                                <button type="submit" name="join" class="btn btn-success btn-block">Join</button>
+                                <button type="button" class="toggle-card btn btn-outline-light btn-block d-flex justify-content-center align-items-center"><i class="material-icons">loop</i> <span>Create</span></button>
                             </div>
                             <div class="p-1 w-50">
-                                <button type="button" class="toggle-card btn btn-outline-light btn-block">Create</button>
+                                <button type="submit" name="join" class="btn btn-success btn-block">Join</button>
                             </div>
                         </div>
                     </form>
@@ -45,7 +45,7 @@
                         {{ create_form|crispy }}
                         <div class="form-row">
                             <div class="p-1 w-50">
-                                <button type="button" class="toggle-card btn btn-outline-light btn-block">Join</button>
+                                <button type="button" class="toggle-card btn btn-outline-light btn-block d-flex justify-content-center align-items-center"><i class="material-icons">loop</i> <span>Join</span></button>
                             </div>
                             <div class="p-1 w-50">
                                 <button type="submit" name="create" class="btn btn-success btn-block">Create</button>
