@@ -39,7 +39,9 @@ class Question(models.Model):
     explanation = models.TextField(help_text='Provide some more context about the right answer and maybe frame it in the larger picture of the other answers. This explanation will be displayed after an answer was picked, irrepective of whether the right or wrong answer was chosen.')
     contributor = models.CharField(max_length=255)
     space = models.ForeignKey('Space', on_delete=models.CASCADE, related_name='questions')
+    created = models.DateTimeField(auto_now_add=True)
 
+    @property
     def trimmed_question(self):
         return f'{self.question[:10]}...' if len(self.question) > 10 else str(self.question)
 
