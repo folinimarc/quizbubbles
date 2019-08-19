@@ -1,3 +1,5 @@
+"use strict";
+
 /* VUE APP */
 var app = new Vue({
   el: '#app',
