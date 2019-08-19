@@ -10,7 +10,7 @@ from django.contrib import messages
 from django.contrib.auth.hashers import make_password, check_password
 import json
 import random
-from .decorators import session_authenticated
+from .decorators import session_authenticated, questionedit_authenticated
 from .models import *
 from .forms import *
 
@@ -272,3 +272,24 @@ class Quiz(View):
                 'status': 'OK'
             })
         return JsonResponse({'status': 'ERROR', 'message': 'You reached a deep dark point where you should not be... There are dragons! Please report this.'})
+
+
+@method_decorator([session_authenticated], name='dispatch')
+class QuestionList(View):
+    
+    def get(self, request):
+        ctx = {}
+        space = Space.objects.filter(uuid=request.session.get('spaceid', None)).first()
+        questions = Question.objects.filter(space_id=space.id).order_by('id')
+        ctx['questions'] = questions
+        return render(request, 'quiz/question_list.html', ctx)
+
+@method_decorator([questionedit_authenticated], name='dispatch')
+class EditQuestion(View):
+
+    def get(self, request, question_id):
+        ctx = {}
+        question = Question.objects.get(id=question_id)
+        form = QuestionModelForm(instance=question)
+        ctx['form'] = form
+        return render(request, 'quiz/edit_question.html', ctx)
