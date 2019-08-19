@@ -81,6 +81,10 @@ a {
     height: 240px;
 }
 
+.h-330px {
+    height: 330px;
+}
+
 .cursor-pointer {
     cursor: pointer;
 }

@@ -1,4 +1,14 @@
-function submit_pw() {
-    const password = document.querySelector('input[name=password]').value;
-    ajax_submit({'password': password}, 'error-message-login');
-}
+"use strict";
+
+var flipcard = document.getElementById('flipcard');
+Array.from(document.querySelectorAll('.toggle-card')).forEach(function(el) {
+    el.addEventListener('click', function(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        if (flipcard.classList.contains('flipped')) {
+            flipcard.classList.remove('flipped');
+        } else {
+            flipcard.classList.add('flipped');
+        }
+    }, true)
+});

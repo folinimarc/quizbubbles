@@ -1,5 +1,6 @@
 from .models import *
 import random
+from django.contrib.auth.hashers import make_password
 
 def randStr(maxi):
         return ''.join(random.choices(' abcdef ghijklm nopqrs tuvwxyz ', k=random.randint(10, maxi)))
@@ -7,7 +8,14 @@ def randStr(maxi):
 def setup():
     print('start')
 
-    questions_per_difficulty = 30
+    #create space
+    space = Space.objects.create(
+            name='test',
+            password=make_password('test'),
+            email='test@test.com'
+    )
+
+    questions_per_difficulty = 20
 
     for difficulty in Question.DIFFICULTIES:
         print(f'---- {difficulty[0]} -----')
@@ -21,7 +29,8 @@ def setup():
                 correct_answer=Question.ANSWER_A,
                 difficulty=difficulty[0],
                 explanation=randStr(400),
-                author='fom'
+                contributor='fom',
+                space_id=space.id
             )
 
     print('finished')

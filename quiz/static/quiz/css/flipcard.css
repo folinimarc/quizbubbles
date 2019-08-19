@@ -1,5 +1,5 @@
 /*
-FROM https://codepen.io/edeesims/pen/iGDzk
+MODIFIED FROM https://codepen.io/edeesims/pen/iGDzk
 */
 
 .flip-card {
@@ -25,7 +25,7 @@ FROM https://codepen.io/edeesims/pen/iGDzk
     position: absolute;
     height: 100%;
     width: 100%;
-    backface-visibility: hidden;
+    backface-visibility: hidden !important;
 }
 
 .back {

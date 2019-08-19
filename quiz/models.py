@@ -38,6 +38,7 @@ class Question(models.Model):
     difficulty = models.IntegerField(choices=DIFFICULTIES)
     explanation = models.TextField(help_text='Provide some more context about the right answer and maybe frame it in the larger picture of the other answers. This explanation will be displayed after an answer was picked, irrepective of whether the right or wrong answer was chosen.')
     contributor = models.CharField(max_length=255)
+    space = models.ForeignKey('Space', on_delete=models.CASCADE, related_name='questions')
 
     def trimmed_question(self):
         return f'{self.question[:10]}...' if len(self.question) > 10 else str(self.question)
@@ -61,7 +62,23 @@ class Game(models.Model):
     questions_total = models.IntegerField(default=0)
     question_ids = models.TextField()
     startdatetime = models.DateTimeField(auto_now_add=True)
-    enddatetime = models.DateTimeField(auto_now=True)
+    enddatetime = models.DateTimeField(null=True, blank=True)
+    last_access = models.DateTimeField(auto_now=True)
     helperdatetime = models.DateTimeField(null=True, blank=True)
     duration = models.IntegerField(default=0)
     intermezzo_state = models.BooleanField(default=True)
+    space = models.ForeignKey('Space', on_delete=models.CASCADE, related_name='games')
+
+    def __str__(self):
+        return f'Game {self.id}'
+
+class Space(models.Model):
+    uuid = models.UUIDField(default=uuid.uuid4)
+    name = models.CharField(max_length=20)
+    email = models.EmailField()
+    password = models.CharField(max_length=20)
+    created = models.DateTimeField(auto_now_add=True)
+    last_access = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.name
