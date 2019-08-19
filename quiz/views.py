@@ -7,6 +7,7 @@ from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.db.models import F
 from django.contrib import messages
+from django.contrib.auth.hashers import make_password, check_password
 import json
 import random
 from .decorators import session_authenticated
@@ -19,53 +20,84 @@ import time
 class Login(View):
     def get(self, request):
         ctx = {}
+        ctx['join_form'] = SpaceJoinForm()
+        ctx['create_form'] = SpaceCreateForm()
+        ctx['flipShowJoin'] = True
         return render(request, 'quiz/login.html', ctx)
 
     def post(self, request):
-        response_json = {'status': 'ERROR'}
-        payload = json.loads(request.body)
-        if payload.get('password', None) == settings.PASSWORD:
-            request.session['authenticated'] = True
-            request.session.set_expiry(0)
-            return JsonResponse({
-                'status': 'OK', 
-                'successRedirectUrl': reverse('home')
-                })
-        return JsonResponse({
-                'status': 'ERROR', 
-                'message': 'Password was rejected'
-                })
+        ctx = {}
+        print(request.POST)
+        # handle join request
+        if 'join' in request.POST:
+            join_form = SpaceJoinForm(request.POST)
+            if join_form.is_valid():
+                space = Space.objects.filter(name=join_form.cleaned_data['name']).first()
+                if space and check_password(join_form.cleaned_data['password'], space.password):
+                    request.session['spaceid'] = str(space.uuid)
+                    return redirect('home')
+                join_form.add_error('password', 'Wrong spacename or password')
+            ctx['flipShowJoin'] = True
+            ctx['join_form'] = join_form
+            ctx['create_form'] = SpaceCreateForm()
+            return render(request, 'quiz/login.html', ctx)
+
+        # handle create request
+        if 'create' in request.POST:
+            create_form = SpaceCreateForm(request.POST)
+            if create_form.is_valid():
+                # Enforce uniqueness of name
+                if Space.objects.filter(name=create_form.cleaned_data['name']).exists():
+                    create_form.add_error('name', 'Name already in use')
+                else:
+                    # create quizspace
+                    space = Space.objects.create(
+                        name = create_form.cleaned_data['name'],
+                        email = create_form.cleaned_data['email'],
+                        password = make_password(create_form.cleaned_data['password1'])
+                    )
+                    messages.info(request, f'New quizspace \"{create_form.cleaned_data["name"]}\" successfully created. Click to hide me. Have fun!')
+                    request.session['spaceid'] = str(space.uuid)
+                    return redirect('home')
+            ctx['flipShowJoin'] = False
+            ctx['join_form'] = SpaceJoinForm()
+            ctx['create_form'] = create_form
+            return render(request, 'quiz/login.html', ctx)
+
+        return redirect('login')
 
 
 @method_decorator([session_authenticated], name='dispatch')
 class Home(View):
 
-    def get_sprint_question_pks(self):
-        all_questions = list(Question.objects.values_list('pk', 'difficulty'))
+    def get_sprint_question_pks(self, space):
+        all_questions = list(Question.objects.filter(space_id=space.id).values_list('pk', 'difficulty'))
         random.shuffle(all_questions)
         question_dict = {difficulty: [] for difficulty, _ in Question.DIFFICULTIES}
         [question_dict[difficulty].append(pk) for pk, difficulty in all_questions]
         question_list = []
         for difficulty, _ in Question.DIFFICULTIES:
             question_list.extend(question_dict[difficulty][:settings.SPRINT_NR_QUESTIONS_PER_DIFFICULTY])
-        questions_total = len(Question.DIFFICULTIES * settings.SPRINT_NR_QUESTIONS_PER_DIFFICULTY)
+        questions_total = len(question_list)
         return questions_total, ','.join(str(pk) for pk in question_list)
 
-    def get_marathon_question_pks(self):
-        question_list = list(Question.objects.values_list('pk', flat=True))
+    def get_marathon_question_pks(self, space):
+        question_list = list(Question.objects.filter(space_id=space.id).values_list('pk', flat=True))
         random.shuffle(question_list)
         questions_total = len(question_list)
         return questions_total, ','.join(str(pk) for pk in question_list)
 
     def get(self, request):
         ctx = {}
-        ctx['nr_sprint_questions'] = settings.SPRINT_NR_QUESTIONS_PER_DIFFICULTY * len(Question.DIFFICULTIES)
-        ctx['nr_marathon_questions'] = Question.objects.all().count()
+        space = Space.objects.get(uuid=request.session['spaceid'])
+        nr_questions = Question.objects.filter(space_id=space).count()
+        ctx['nr_sprint_questions'] = min(nr_questions, settings.SPRINT_NR_QUESTIONS_PER_DIFFICULTY * len(Question.DIFFICULTIES))
+        ctx['nr_marathon_questions'] = nr_questions
         ctx['sprint_champions'] = Game.objects\
-            .filter(active=False, gametype=Game.SPRINT)\
+            .filter(space_id=space.id, active=False, gametype=Game.SPRINT)\
             .order_by('-questions_answered', 'duration')[:settings.NR_LEADERBOARD_ENTRIES_TO_SHOW]
         ctx['marathon_champions'] = Game.objects\
-            .filter(active=False, gametype=Game.MARATHON)\
+            .filter(space_id=space.id, active=False, gametype=Game.MARATHON)\
             .order_by('-questions_answered', 'duration')[:settings.NR_LEADERBOARD_ENTRIES_TO_SHOW]
         return render(request, 'quiz/home.html', ctx)
 
@@ -88,10 +120,11 @@ class Home(View):
         if old_gameid:
             Game.objects.filter(uuid=old_gameid).update(active=False)
         # Create new game
+        space = Space.objects.get(uuid=request.session['spaceid'])
         if form.cleaned_data['gametype'] == Game.SPRINT:
-            questions_total, question_ids = self.get_sprint_question_pks()
+            questions_total, question_ids = self.get_sprint_question_pks(space)
         elif form.cleaned_data['gametype'] == Game.MARATHON:
-            questions_total, question_ids = self.get_marathon_question_pks()
+            questions_total, question_ids = self.get_marathon_question_pks(space)
         else:
             return JsonResponse({
                 'status': 'ERROR', 
@@ -100,7 +133,8 @@ class Home(View):
         game = Game.objects.create(
             **form.cleaned_data, 
             questions_total=questions_total,
-            question_ids=question_ids
+            question_ids=question_ids,
+            space_id=space.id
             )
         request.session['gameid'] = str(game.uuid)
         return JsonResponse({
@@ -119,9 +153,13 @@ class NewQuestion(View):
 
     def post(self, request):
         ctx = {}
+        space = Space.objects.get(uuid=request.session['spaceid'])
         form = QuestionModelForm(request.POST)
         if form.is_valid():
-            form.save()
+            Question.objects.create(
+                **form.cleaned_data,
+                space_id=space.id
+            )
             messages.info(request, 'Thank you! Your question was added.')
             return redirect('home')
         ctx['form'] = form
@@ -140,8 +178,8 @@ class Quiz(View):
         return get_object_or_404(Question, pk=question_pk)
 
     def get_ranking(self, game):
-        outperform_questions = Game.objects.filter(active=False, gametype=game.gametype, questions_answered__gt=game.questions_answered).count()
-        outperform_time = Game.objects.filter(active=False, gametype=game.gametype, questions_answered=game.questions_answered, duration__lt=game.duration).count()
+        outperform_questions = Game.objects.filter(space_id=game.space_id, active=False, gametype=game.gametype, questions_answered__gt=game.questions_answered).count()
+        outperform_time = Game.objects.filter(space_id=game.space_id, active=False, gametype=game.gametype, questions_answered=game.questions_answered, duration__lt=game.duration).count()
         rank = outperform_questions + outperform_time + 1
         return rank
 
@@ -173,7 +211,7 @@ class Quiz(View):
         if action == 'getGameData':
             game = self.get_current_game(game_id)
             rank = self.get_ranking(game)
-            total_games = Game.objects.filter(active=False, gametype=game.gametype).count()
+            total_games = Game.objects.filter(space_id=game.space_id, active=False, gametype=game.gametype).count()
             return JsonResponse({
                 'status': 'OK',
                 'gametype': game.get_gametype_display(),
@@ -209,8 +247,10 @@ class Quiz(View):
                 game.questions_answered += 1
                 if game.questions_answered == game.questions_total:
                     game.active = False
+                    game.enddatetime = timezone.now()
             else:
                 game.active = False
+                game.enddatetime = timezone.now()
             game.save()
             rank = self.get_ranking(game)
             return JsonResponse({
@@ -225,9 +265,10 @@ class Quiz(View):
         if action == 'closeGame':
             game = self.get_current_game(game_id)
             if not game.intermezzo_state:
+                game.enddatetime = timezone.now()
                 game.active = False
                 game.save()
             return JsonResponse({
                 'status': 'OK'
             })
-        return JsonResponse({'status': 'OK', 'message': 'NO ERROR JUHUU'})
+        return JsonResponse({'status': 'ERROR', 'message': 'You reached a deep dark point where you should not be... There are dragons! Please report this.'})
