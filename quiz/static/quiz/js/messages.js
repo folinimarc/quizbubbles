@@ -1,3 +1,5 @@
+"use strict";
+
 function removeMessage(event) {
     const el = event.target;
     if (el.classList.contains('message')) {

@@ -1,3 +1,5 @@
+"use strict";
+
 function start_sprint() {
     const player = document.querySelector('input[name=player-sprint]').value;
     const gametype = 0;

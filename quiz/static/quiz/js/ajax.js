@@ -1,3 +1,5 @@
+"use strict";
+
 function ajax_submit(dataObj, errorElId, url='') {
     var request = new XMLHttpRequest();
     const csrftoken = document.querySelector('input[name=csrfmiddlewaretoken]').value;
