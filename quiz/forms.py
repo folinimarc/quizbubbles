@@ -5,7 +5,7 @@ from .models import *
 class QuestionModelForm(forms.ModelForm):
     class Meta:
         model = Question
-        exclude = ('chosen_a', 'chosen_b', 'chosen_c', 'chosen_d', 'space')
+        fields = ('question', 'answer_a', 'answer_b', 'answer_c', 'answer_d', 'correct_answer', 'difficulty', 'explanation', 'contributor')
 
         labels = {
             'answer_a': 'A)',
