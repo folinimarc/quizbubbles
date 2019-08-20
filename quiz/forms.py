@@ -15,7 +15,7 @@ class QuestionModelForm(forms.ModelForm):
         }
 
         widgets = {
-            'question': forms.Textarea(attrs={'rows':2}),
+            'question': forms.Textarea(attrs={'rows':2, 'autofocus': 'autofocus'}),
             'answer_a': forms.Textarea(attrs={'rows':1}),
             'answer_b': forms.Textarea(attrs={'rows':1}),
             'answer_c': forms.Textarea(attrs={'rows':1}),
@@ -43,8 +43,8 @@ class SpaceJoinForm(forms.ModelForm):
         model = Space
         fields = ('name', 'password')
         widgets = {
+            'name': forms.TextInput(attrs={'placeholder': 'Spacename', 'autofocus': 'autofocus'}),
             'password': forms.PasswordInput(attrs={'placeholder': 'Password'}),
-            'name': forms.TextInput(attrs={'placeholder': 'Spacename'}),
             }
 
 
