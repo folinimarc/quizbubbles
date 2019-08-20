@@ -26,8 +26,17 @@
         {% endfor %}
     </div>
 </div>
-
-<div class="row mt-5">
+<!-- header -->
+<div class="row my-4 text-light">
+    <div class="col-md-6 d-flex justify-content-start align-items-center">
+        <h2>{{space_name}} <a href="{% url 'login' %}" class="btn-mini btn btn-outline-light">Logout</a></h2>
+    </div>
+    <div class="col-md-6 d-flex flex-column justify-content-center align-items-end">
+        <span>{{nr_questions}} questions</span>
+        <span>{{nr_games}} games played</span>
+    </div>
+</div>
+<div class="row mb-5">
     <div class="col-md-4 mb-3">
         <!-- Play sprint -->
         <div class="flip-card hoverable h-200px">
@@ -37,16 +46,23 @@
                 </div>
                 <div class="back bordered cursor-pointer bg-primary text-light p-3 d-flex justify-content-center align-items-center">
                     <div>
+                        {% if not enough_questions %}
+                            <p>Not enough questions...</p>
+                            {% for diff in difficulty_list %}
+                            <p class="mb-0">{{diff.difficulty}}:  <span class="{% if diff.missing %}text-warning{% else %}text-success{% endif %}">{{diff.count}}/{{diff.max}}</span></p>
+                            {% endfor %}
+                        {% else %}
                         <p class="text-light">{{nr_sprint_questions}} questions in ascending difficulty. Go for it!</p>
                         <div class="form-group">
                             <div class="input-group">
                                 <input class="form-control" name="player-sprint" placeholder="Name" type="text">
                                 <div class="input-group-append">
-                                    <button onclick="start_sprint();" class="btn btn-success btn-block">Go</button>
+                                    <button id="btn-start-sprint" class="btn btn-success btn-block">Go</button>
                                 </div>
                             </div>
                         </div>
                         <small id="error-message-sprint" class="error-message text-white m-0" style="opacity:0;">Not a valid name.</small>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -61,15 +77,19 @@
                 </div>
                 <div class="back bordered cursor-pointer bg-primary text-light p-3 d-flex justify-content-center align-items-center">
                     <div>
-                        <p class="text-light">All questions ({{nr_marathon_questions}}) in random order. Good luck!</p>
+                        {% if nr_questions < 1 %}
+                        <p>No questions yet...</p>
+                        {% else %}
+                        <p class="text-light">All questions ({{nr_questions}}) in random order. Good luck!</p>
                         <div class="form-group">
                             <div class="input-group">
                                 <input class="form-control" name="player-marathon" placeholder="Name" type="text">
                                 <div class="input-group-append">
-                                    <button onclick="start_marathon();" class="btn btn-success btn-block">Go</button>
+                                    <button id="btn-start-marathon" class="btn btn-success btn-block">Go</button>
                                 </div>
                             </div>
                         </div>
+                        {% endif %}
                         <small id="error-message-marathon" class="error-message text-white m-0" style="opacity:0;"></small>
                     </div>
                 </div>
@@ -84,28 +104,27 @@
                     <span><i class="material-icons">add_circle_outline</i>Contribute</span>
                 </div>
                 <div class="back bordered cursor-pointer bg-success text-light p-3 d-flex justify-content-center align-items-center">
-                    <div>
-                        <p class="text-light">Add or edit questions</p>
-                        <a href="{% url 'new_question' %}" class="btn btn-primary btn-block">Contribute</a>
-                        <a href="{% url 'question_list' %}" class="btn btn-primary btn-block">Edit</a>
+                    <div class="nav-row">
+                        <a href="{% url 'new_question' %}" class="btn btn-outline-primary btn-block mb-4">Add question</a>
+                        <a href="{% url 'question_list' %}" class="btn btn-outline-primary btn-block">Edit question</a>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
-<div class="row my-5">
+<div class="row mb-5">
     <div class="col-md-6">
         <!-- Sprint leaderboard -->
         <div class="px-2">
-            <h2 class="border-bottom border-light text-light">Sprint Champions</h2>
+            <h3 class="border-bottom border-light text-light">Sprint Champions</h3>
             {% include 'quiz/includes/leaderboard.html' with leaders=sprint_champions %}
         </div>
     </div>
     <div class="col-md-6">
         <!-- Marathon leaderboard -->
         <div class="px-2">
-            <h2 class="border-bottom border-light text-light">Marathon Champions</h2>
+            <h3 class="border-bottom border-light text-light">Marathon Champions</h3>
             {% include 'quiz/includes/leaderboard.html' with leaders=marathon_champions %}
         </div>
     </div>

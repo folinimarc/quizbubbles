@@ -90,17 +90,37 @@ class Home(View):
     def get(self, request):
         ctx = {}
         space = Space.objects.get(uuid=request.session['spaceid'])
-        nr_questions = Question.objects.filter(space_id=space).count()
-        ctx['nr_sprint_questions'] = min(nr_questions, settings.SPRINT_NR_QUESTIONS_PER_DIFFICULTY * len(Question.DIFFICULTIES))
-        ctx['nr_marathon_questions'] = nr_questions
+        difficulty_counts = Question.objects.filter(space_id=space.id).values('difficulty').annotate(count=Count('difficulty'))
+        difficulty_dict = OrderedDict()
+        for db_val, verbose in sorted(Question.DIFFICULTIES, key=lambda x: x[0]):
+            difficulty_dict[verbose] = 0
+        for obj in difficulty_counts:
+            verbose = Question.get_verbose_difficulty_from_dbvalue(obj['difficulty'])
+            difficulty_dict[verbose] = obj['count']
+        enough_questions = all(v >= settings.SPRINT_NR_QUESTIONS_PER_DIFFICULTY for v in difficulty_dict.values())
+        ctx['enough_questions'] = enough_questions
+        if not enough_questions:
+            difficulty_list = [{
+                'difficulty': verbose,
+                'count': count,
+                'max': settings.SPRINT_NR_QUESTIONS_PER_DIFFICULTY,
+                'missing': count < settings.SPRINT_NR_QUESTIONS_PER_DIFFICULTY
+                } for verbose, count in difficulty_dict.items()]
+            ctx['difficulty_list'] = difficulty_list
+        nr_questions = Question.objects.filter(space_id=space.id).count()
+        ctx['nr_sprint_questions'] = len(Question.DIFFICULTIES * settings.SPRINT_NR_QUESTIONS_PER_DIFFICULTY)
+        ctx['nr_questions'] = nr_questions
         ctx['sprint_champions'] = Game.objects\
             .filter(space_id=space.id, active=False, gametype=Game.SPRINT)\
             .order_by('-questions_answered', 'duration')[:settings.NR_LEADERBOARD_ENTRIES_TO_SHOW]
         ctx['marathon_champions'] = Game.objects\
             .filter(space_id=space.id, active=False, gametype=Game.MARATHON)\
             .order_by('-questions_answered', 'duration')[:settings.NR_LEADERBOARD_ENTRIES_TO_SHOW]
+        ctx['nr_games'] = Game.objects.filter(space_id=space.id).count()
+        ctx['space_name'] = space.name
         return render(request, 'quiz/home.html', ctx)
 
+    @transaction.atomic
     def post(self, request):
         payload = json.loads(request.body)
         action = payload.get('action', None)
