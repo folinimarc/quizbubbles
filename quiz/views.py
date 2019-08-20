@@ -5,7 +5,8 @@ from django.http import JsonResponse
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.decorators import method_decorator
-from django.db.models import F
+from django.db import transaction
+from django.db.models import F, Count
 from django.contrib import messages
 from django.contrib.auth.hashers import make_password, check_password
 import json
@@ -13,6 +14,7 @@ import random
 from .decorators import session_authenticated, questionedit_authenticated
 from .models import *
 from .forms import *
+from collections import OrderedDict
 
 import time
 
@@ -20,11 +22,13 @@ import time
 class Login(View):
     def get(self, request):
         ctx = {}
+        request.session['spaceid'] = None
         ctx['join_form'] = SpaceJoinForm()
         ctx['create_form'] = SpaceCreateForm()
         ctx['flipShowJoin'] = True
         return render(request, 'quiz/login.html', ctx)
 
+    @transaction.atomic
     def post(self, request):
         ctx = {}
         print(request.POST)
@@ -168,9 +172,10 @@ class Home(View):
 class NewQuestion(View):
     def get(self, request):
         ctx = {}
-        ctx['form'] = QuestionModelForm()
+        ctx['form'] = QuestionModelForm(initial={'contributor': request.session.get('contributor', None)})
         return render(request, 'quiz/new_question.html', ctx)
 
+    @transaction.atomic
     def post(self, request):
         ctx = {}
         space = Space.objects.get(uuid=request.session['spaceid'])
@@ -180,10 +185,12 @@ class NewQuestion(View):
                 **form.cleaned_data,
                 space_id=space.id
             )
+            request.session['contributor'] = form.cleaned_data['contributor']
             messages.info(request, 'Thank you! Your question was added.')
-            return redirect('home')
+            return redirect('new_question')
+        else:
+            messages.info(request, 'There were problems with your form. Please check the form field messages and submit again.')
         ctx['form'] = form
-        messages.info(request, 'There were problems with your form. Please check the form field messages and submit again.')
         return render(request, 'quiz/new_question.html', ctx)
 
 
@@ -207,6 +214,7 @@ class Quiz(View):
         ctx = {}
         return render(request, 'quiz/quiz.html', ctx)
 
+    @transaction.atomic
     def post(self, request):
         #time.sleep(0.5)
         payload = json.loads(request.body)
@@ -217,7 +225,7 @@ class Quiz(View):
                 'status': 'ERROR', 
                 'message': 'No game was found that corresponds to this session. Please report this.'
                 })
-        if action not in ['getGameData', 'checkAnswer', 'nextQuestion', 'closeGame']:
+        if action not in ['getGameData', 'checkAnswer', 'nextQuestion', 'closeGame', 'jokerFiftyFifty', 'jokerAudience']:
             return JsonResponse({
                 'status': 'ERROR', 
                 'message': 'No valid action was supplied. Please report this.'
@@ -226,7 +234,7 @@ class Quiz(View):
         if not game.active:
             return JsonResponse({
                 'status': 'ERROR',
-                'message': f'This game is not active anymore. Please start a <a class="text-warning" href=\"{reverse("home")}\">new game.</a>'
+                'message': f'This game is not active anymore. Please start a new game.'
                 })
         if action == 'getGameData':
             game = self.get_current_game(game_id)
@@ -241,6 +249,37 @@ class Quiz(View):
                 'questionsAnswered': game.questions_answered,
                 'questionsTotal': game.questions_total,
                 })
+        if action == 'jokerAudience':
+            game = self.get_current_game(game_id)
+            if not game.joker_audience_available:
+                return JsonResponse({
+                    'status': 'ERROR',
+                    'message': 'Audience joker is not available anymore.',
+                    })
+            game.joker_audience_available = False
+            game.save()
+            question = self.get_current_question(game)
+            chosen_answers_count = json.loads(question.chosen_answers_count)
+            return JsonResponse({
+                    'status': 'OK', 
+                    'chosen_answers_count': chosen_answers_count
+                    })
+        if action == 'jokerFiftyFifty':
+            game = self.get_current_game(game_id)
+            if not game.joker_fiftyfifty_available:
+                return JsonResponse({
+                    'status': 'ERROR',
+                    'message': 'Fifty-fifty joker is not available anymore.',
+                    })
+            game.joker_fiftyfifty_available = False
+            game.save()
+            question = self.get_current_question(game)
+            kill = random.sample({'a','b','c','d'}.difference({question.correct_answer}), 2)
+            return JsonResponse({
+                    'status': 'OK', 
+                    'kill': kill
+                    })
+
         if action == 'nextQuestion':
             game = self.get_current_game(game_id)
             game.helperdatetime = timezone.now()
@@ -249,20 +288,35 @@ class Quiz(View):
             question = self.get_current_question(game)
             return JsonResponse({
                 'status': 'OK',
-                'questionBody': question.question,
-                'questionDifficulty': question.get_difficulty_display(),
-                'answerA': question.answer_a,
-                'answerB': question.answer_b,
-                'answerC': question.answer_c,
-                'answerD': question.answer_d,
+                'question': {
+                    'header': f'Question {game.questions_answered + 1} ({question.get_difficulty_display()})',
+                    'body': question.question,
+                },
+                'answers': {
+                    'a': question.answer_a,
+                    'b': question.answer_b,
+                    'c': question.answer_c,
+                    'd': question.answer_d,
+                    }
                 })
         if action == 'checkAnswer':
             answer = payload.get('answer', None)
+            if not answer:
+                return JsonResponse({
+                        'status': 'ERROR', 
+                        'message': 'No answer supplied in request. Please report this.'
+                        })
             game = self.get_current_game(game_id)
-            question = self.get_current_question(game)
             timedelta = timezone.now() - game.helperdatetime
             game.duration += timedelta.seconds
             game.intermezzo_state = True
+            question = self.get_current_question(game)
+            # update answer count
+            chosen_answers_count = json.loads(question.chosen_answers_count)
+            chosen_answers_count[answer] += 1
+            question.chosen_answers_count = json.dumps(chosen_answers_count)
+            question.save()
+            # check answer
             if answer == question.correct_answer:
                 game.questions_answered += 1
                 if game.questions_answered == game.questions_total:
@@ -304,6 +358,7 @@ class QuestionList(View):
         ctx['questions'] = questions
         return render(request, 'quiz/question_list.html', ctx)
 
+
 @method_decorator([questionedit_authenticated], name='dispatch')
 class EditQuestion(View):
 
@@ -313,3 +368,22 @@ class EditQuestion(View):
         form = QuestionModelForm(instance=question)
         ctx['form'] = form
         return render(request, 'quiz/edit_question.html', ctx)
+
+    @transaction.atomic
+    def post(self, request, question_id):
+        ctx = {}
+        question = Question.objects.get(id=question_id)
+        if 'delete' in request.POST:
+            question.delete()
+            messages.info(request, f'Question {question_id} successfully deleted!')
+            return redirect('question_list')
+        form = QuestionModelForm(request.POST, instance=question)
+        if not form.is_valid():
+            messages.info(request, 'There were problems with your form. Please check the form field messages and submit again.')
+            ctx['form'] = form
+            return render(request, 'quiz/edit_question.html', ctx)
+        form.save()
+        messages.info(request, f'Question {question_id} successfully edited!')
+        return redirect('question_list')
+
+        

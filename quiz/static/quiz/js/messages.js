@@ -9,3 +9,12 @@ function removeMessage(event) {
 
 // kick off
 document.getElementById('message-box').addEventListener('click', removeMessage);
+//remove messages after 3 seconds
+setTimeout(function() {
+    Array.from(document.querySelectorAll('.message')).forEach(function(el) {
+        el.classList.add('opacity-zero');
+        setTimeout(function() {
+            el.parentElement.removeChild(el);
+        }, 1000)
+    });
+}, 3000);
