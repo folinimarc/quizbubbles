@@ -14,7 +14,7 @@
 
 
 {% block content %}
-<section id="app-wrapper" class="opacity-zero">
+<section id="app-wrapper" class="opacity-fade opacity-zero">
     <div id="app">
         <!-- messages -->
         <div id="message-box">
@@ -26,25 +26,22 @@
             </template>
         </div>
         <!-- header -->
-        <div class="row text-light my-3 d-flex justify-content-between">
-            <div class="col-sm-2 text-center">
+        <div class="row text-light my-3 justify-content-between">
+            <div class="col-md-2 text-center d-flex align-items-center justify-content-center">
                 <h5 class="m-0">[[gametype]]</h5>
             </div>
-            <div class="col-sm-2">
-                <div :class="{'opacity-zero': !loading}" class="stretch-out d-flex align-items-center justify-content-center">
-                    <span class="spinner-border"></span>
-                    <span class="ml-2">loading...</span>
-                </div>
+            <div class="col-md-1 text-center d-flex align-items-center justify-content-center p-2">
+                <span :class="{'opacity-zero': !loading}" class="opacity-fade spinner-border"></span>
             </div>
-            <div class="col-sm-4 d-flex align-items-center justify-content-center">
-                <span>Joker1</span>
-                <span class="ml-2">Joker2</span>
-                <span class="ml-2">Joker3</span>
+            <div class="col-md-3 d-flex align-items-center justify-content-center">
+                <button @click="jokerFiftyFifty()" :class="{'opacity-zero': !jokerFiftyFiftyAvailable}" class="joker btn btn-light" type="button">50:50</button>
+                <i @click="jokerAudience()" :class="{'opacity-zero': !jokerAudienceAvailable}" class="joker material-icons btn btn-light mx-2 cursor-pointer">group</i>
+                <i class="joker material-icons">favorite</i>
             </div>
-            <div class="col-sm-2 d-flex align-items-center justify-content-center">
-                [[questionsAnswered]]/[[questionsTotal]] | Rank: [[rank]]
+            <div class="col-md-4 d-flex align-items-center justify-content-center">
+                Progress: [[questionsAnswered]]/[[questionsTotal]] | Rank: [[rank]]
             </div>
-            <div class="col-sm-2 d-flex align-items-center justify-content-center">
+            <div class="col-md-2 d-flex align-items-center justify-content-center">
                 <h5 id="timer" class="m-0">[[formattedTime()]]</h5>
             </div>
         </div>
@@ -101,8 +98,8 @@
                         <!-- back question -->
                         <div class="back bordered noselect bg-primary text-light p-4 overflow-auto d-flex">
                             <div class="stretch-out question">
-                                <h3>[[questionHeader]]</h3>
-                                <p>[[questionBody]]</p>
+                                <h3>[[question.header]]</h3>
+                                <p>[[question.body]]</p>
                             </div>
                         </div>
                     </div>
@@ -110,33 +107,33 @@
             </div>
         </div>
         <!-- answers -->
-        <div :class="{'opacity-zero': answersHidden}" class="row my-4" @click="answerClicked();">
+        <div class="row my-4" @click="answerClicked();">
             <div class="col-md-6 mb-3">
                 <div id="a" class="answer noselect p-3 d-flex justify-content-start align-items-center"
-                    :class="[getAnswerClass('a'), (awaitingAnswer ? 'cursor-pointer': 'no-pointerevents')]">
-                    <div class="answer-letter noevent">A</div>
-                    [[answerA]]
+                    :class="[getAnswerClass('a'), (awaitingAnswer ? 'cursor-pointer': 'no-pointerevents'), {'opacity-zero': hiddenAnswers.includes('a')}]">
+                    <div class="answer-letter noevent">[[letters.a]]</div>
+                    [[answers.a]]
                 </div>
             </div>
             <div class="col-md-6 mb-3">
                 <div id="b" class="answer noselect p-3 d-flex justify-content-start align-items-center"
-                    :class="[getAnswerClass('b'), (awaitingAnswer ? 'cursor-pointer': 'no-pointerevents')]">
-                    <div class="answer-letter noevent">B</div>
-                    [[answerB]]
+                    :class="[getAnswerClass('b'), (awaitingAnswer ? 'cursor-pointer': 'no-pointerevents'), {'opacity-zero': hiddenAnswers.includes('b')}]">
+                    <div class="answer-letter noevent">[[letters.b]]</div>
+                    [[answers.b]]
                 </div>
             </div>
             <div class="col-md-6 mb-3">
                 <div id="c" class="answer noselect p-3 d-flex justify-content-start align-items-center"
-                    :class="[getAnswerClass('c'), (awaitingAnswer ? 'cursor-pointer': 'no-pointerevents')]">
-                    <div class="answer-letter noevent">C</div>
-                    [[answerC]]
+                    :class="[getAnswerClass('c'), (awaitingAnswer ? 'cursor-pointer': 'no-pointerevents'), {'opacity-zero': hiddenAnswers.includes('c')}]">
+                    <div class="answer-letter noevent">[[letters.c]]</div>
+                    [[answers.c]]
                 </div>
             </div>
             <div class="col-md-6 mb-3">
                 <div id="d" class="answer noselect p-3 d-flex justify-content-start align-items-center"
-                    :class="[getAnswerClass('d'), (awaitingAnswer ? 'cursor-pointer': 'no-pointerevents')]">
-                    <div class="answer-letter noevent">D</div>
-                    [[answerD]]
+                    :class="[getAnswerClass('d'), (awaitingAnswer ? 'cursor-pointer': 'no-pointerevents'), , {'opacity-zero': hiddenAnswers.includes('d')}]">
+                    <div class="answer-letter noevent">[[letters.d]]</div>
+                    [[answers.d]]
                 </div>
             </div>
         </div>

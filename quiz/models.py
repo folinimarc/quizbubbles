@@ -1,5 +1,6 @@
 from django.db import models
 import uuid
+import json
 
 class Question(models.Model):
 
@@ -30,16 +31,20 @@ class Question(models.Model):
     answer_b = models.TextField()
     answer_c = models.TextField()
     answer_d = models.TextField()
-    chosen_a = models.IntegerField(default=0)
-    chosen_b = models.IntegerField(default=0)
-    chosen_c = models.IntegerField(default=0)
-    chosen_d = models.IntegerField(default=0)
+    chosen_answers_count = models.TextField(default=json.dumps({'a':0, 'b':0, 'c':0, 'd':0}))
     correct_answer = models.CharField(max_length=1, choices=ANSWERS)
     difficulty = models.IntegerField(choices=DIFFICULTIES)
     explanation = models.TextField(help_text='Provide some more context about the right answer and maybe frame it in the larger picture of the other answers. This explanation will be displayed after an answer was picked, irrepective of whether the right or wrong answer was chosen.')
     contributor = models.CharField(max_length=255)
     space = models.ForeignKey('Space', on_delete=models.CASCADE, related_name='questions')
     created = models.DateTimeField(auto_now_add=True)
+
+    @staticmethod
+    def get_verbose_difficulty_from_dbvalue(db_value):
+        for db_val, verbose in Question.DIFFICULTIES:
+            if db_value == db_val:
+                return verbose
+        return None
 
     @property
     def trimmed_question(self):
@@ -70,6 +75,8 @@ class Game(models.Model):
     duration = models.IntegerField(default=0)
     intermezzo_state = models.BooleanField(default=True)
     space = models.ForeignKey('Space', on_delete=models.CASCADE, related_name='games')
+    joker_fiftyfifty_available =models.BooleanField(default=True)
+    joker_audience_available =models.BooleanField(default=True)
 
     def __str__(self):
         return f'Game {self.id}'

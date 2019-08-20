@@ -9,27 +9,25 @@ var app = new Vue({
     errorOccured: false,
     gameStarted: false,
     gameActive: true,
-    awaitingAnswer: true,
+    awaitingAnswer: false,
     flipShowQuestion: false,
     timePassed: 0,
     loading: true,
     gamesTotal: 0,
     rank: 0,
-    gametype: '',
-    answersHidden: true,
-    questionBody: '',
+    gametype: 'Loading...',
+    question: {'header': '', 'body': ''},
     questionExplanation: '',
     questionsAnswered: 0,
     questionsTotal: 0,
-    questionDifficulty: '',
-    answerA: '',
-    answerB: '',
-    answerC: '',
-    answerD: '',
+    answers: {'a': '', 'b': '', 'c': '', 'd':''},
+    letters: {'a': 'A', 'b': 'B', 'c': 'C', 'd':'D'},
     questionHeader: '',
     chosenAnswer: null,
     correctAnswer: null,
-    highlightClass: 'bg-warning',
+    jokerFiftyFiftyAvailable: true,
+    jokerAudienceAvailable: true,
+    hiddenAnswers: ['a', 'b', 'c', 'd'],
   },
   mounted() {
     /* AXIOS CSRF CONFIGURATION */
@@ -48,22 +46,32 @@ var app = new Vue({
     }.bind(this), 1000);
   },
   methods: {
+    jokerFiftyFifty: function() {
+      if (!this.awaitingAnswer || !this.jokerFiftyFiftyAvailable) return;
+      this.jokerFiftyFiftyAvailable = false;
+      this.ajaxPost({'action':'jokerFiftyFifty'}, function(response) {
+        this.hiddenAnswers = response.data['kill'];
+      }.bind(this));
+    },
+    jokerAudience: function() {
+      if (!this.awaitingAnswer || !this.jokerAudienceAvailable) return;
+      this.jokerAudienceAvailable = false;
+      this.ajaxPost({'action':'jokerAudience'}, function(response) {
+        this.letters = response.data['chosen_answers_count'];
+      }.bind(this));
+    },
     nextQuestion: function() {
+      this.letters = {'a': 'A', 'b': 'B', 'c': 'C', 'd':'D'};
       this.ajaxPost({'action':'nextQuestion'}, this.startNewRound);
     },
     startNewRound: function(response) {
       const data = response.data;
-      this.questionBody = data['questionBody'];
-      this.questionDifficulty = data['questionDifficulty'];
-      this.questionHeader =  'Question ' + (this.questionsAnswered + 1).toString() + ' (' + this.questionDifficulty + ')';
-      this.answersHidden = true;
+      this.question = Object.assign(this.question, data['question']);
+      this.hiddenAnswers = ['a', 'b', 'c', 'd'];
       this.flipShowQuestion = true;
       setTimeout(function() {
-        this.answerA = data['answerA'];
-        this.answerB = data['answerB'];
-        this.answerC = data['answerC'];
-        this.answerD = data['answerD'];
-        this.answersHidden = false;
+        this.answers = data['answers'];
+        this.hiddenAnswers = [];
         this.awaitingAnswer = true;
         this.chosenAnswer = null;
         this.correctAnswer = null;
@@ -83,21 +91,22 @@ var app = new Vue({
       }.bind(this));
     },
     flipQuestion: function() {
-      if (this.awaitingAnswer) {
-        return;
-      }
+      if (this.awaitingAnswer) return;
       this.flipShowQuestion = !this.flipShowQuestion;
     },
     addMessage: function(message) {
       this.messages.push(message);
+      // remove after 3 seconds
+      setTimeout(function() {
+        let i = this.messages.indexOf(message)
+        if (i >= 0) this.messages.splice(i, 1);
+      }.bind(this), 3000);
     },
     removeMessage: function(index) {
       this.messages.splice(index, 1);
     },
     answerClicked: function($event) {
-      if (!event.target.classList.contains('answer') || !this.awaitingAnswer) {
-        return;
-      }
+      if (!event.target.classList.contains('answer') || !this.awaitingAnswer) return;
       this.awaitingAnswer = false;
       this.chosenAnswer = event.target.id;
       this.stopTimer();
@@ -134,9 +143,7 @@ var app = new Vue({
       }
     },
     startTimer: function() {
-      if (this.timer) {
-        return
-      }
+      if (this.timer) return;
       this.timer = setInterval(function(){
         this.timePassed ++;
       }.bind(this), 1000);
