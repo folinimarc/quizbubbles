@@ -16,8 +16,8 @@
 
 
 {% block content %}
-<div class="h-100vh d-flex justify-content-center align-items-center">
-    <span :class="{'opacity-zero': !loading}" class="opacity-fade spinner-border"></span>
+<div id="spinner" class="position-absolute w-100 h-100vh opacity-fade d-flex justify-content-center align-items-center">
+    <span class="text-light spinner-border"></span>
 </div>
 <section id="main-container" class="opacity-zero opacity-fade">
     <!-- messages -->

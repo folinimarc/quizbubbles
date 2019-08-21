@@ -5,6 +5,10 @@ $(document).ready(function() {
         stateSave: true,
         "fnDrawCallback": function( oSettings ) {
             document.getElementById('main-container').classList.remove('opacity-zero');
+            document.getElementById('spinner').classList.add('opacity-zero');
+            setTimeout(function() {
+                document.getElementById('spinner').className = 'd-none';
+            }, 1000);
         },
         columnDefs: [
         {   targets: 1,
