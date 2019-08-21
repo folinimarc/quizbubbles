@@ -31,7 +31,6 @@ class Login(View):
     @transaction.atomic
     def post(self, request):
         ctx = {}
-        print(request.POST)
         # handle join request
         if 'join' in request.POST:
             join_form = SpaceJoinForm(request.POST)
@@ -225,7 +224,7 @@ class Quiz(View):
                 'status': 'ERROR', 
                 'message': 'No game was found that corresponds to this session. Please report this.'
                 })
-        if action not in ['getGameData', 'checkAnswer', 'nextQuestion', 'closeGame', 'jokerFiftyFifty', 'jokerAudience']:
+        if action not in ['getGameData', 'checkAnswer', 'nextQuestion', 'closeGame', 'jokerFiftyFifty', 'jokerAudience', 'jokerTimestop']:
             return JsonResponse({
                 'status': 'ERROR', 
                 'message': 'No valid action was supplied. Please report this.'
@@ -279,6 +278,20 @@ class Quiz(View):
                     'status': 'OK', 
                     'kill': kill
                     })
+        if action == 'jokerTimestop':
+            game = self.get_current_game(game_id)
+            if not game.joker_timestop_available:
+                return JsonResponse({
+                    'status': 'ERROR',
+                    'message': 'Timestop joker is not available anymore.',
+                    })
+            game.joker_timestop_available = False
+            game.timestop_active = True
+            game.save()
+            return JsonResponse({
+                    'status': 'OK', 
+                    'timePassed': game.duration
+                    })
 
         if action == 'nextQuestion':
             game = self.get_current_game(game_id)
@@ -307,8 +320,10 @@ class Quiz(View):
                         'message': 'No answer supplied in request. Please report this.'
                         })
             game = self.get_current_game(game_id)
-            timedelta = timezone.now() - game.helperdatetime
-            game.duration += timedelta.seconds
+            if not game.timestop_active:
+                game.timestop_active = False
+                timedelta = timezone.now() - game.helperdatetime
+                game.duration += timedelta.seconds
             game.intermezzo_state = True
             question = self.get_current_question(game)
             # update answer count

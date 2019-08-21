@@ -27,6 +27,7 @@ var app = new Vue({
     correctAnswer: null,
     jokerFiftyFiftyAvailable: true,
     jokerAudienceAvailable: true,
+    jokerTimestopAvailable: true,
     hiddenAnswers: ['a', 'b', 'c', 'd'],
   },
   mounted() {
@@ -58,6 +59,14 @@ var app = new Vue({
       this.jokerAudienceAvailable = false;
       this.ajaxPost({'action':'jokerAudience'}, function(response) {
         this.letters = response.data['chosen_answers_count'];
+      }.bind(this));
+    },
+    jokerTimestop: function() {
+      if (!this.awaitingAnswer || !this.jokerTimestopAvailable) return;
+      this.jokerTimestopAvailable = false;
+      this.ajaxPost({'action':'jokerTimestop'}, function(response) {
+        this.timePassed = response.data['timePassed'];
+        this.stopTimer();
       }.bind(this));
     },
     nextQuestion: function() {
@@ -149,6 +158,7 @@ var app = new Vue({
       }.bind(this), 1000);
     },
     stopTimer: function() {
+      if (!this.timer) return;
       clearInterval(this.timer);
       this.timer = null;
     },

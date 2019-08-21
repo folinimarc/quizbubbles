@@ -35,9 +35,9 @@
                 <span :class="{'opacity-zero': !loading}" class="opacity-fade spinner-border"></span>
             </div>
             <div class="col-md-3 d-flex align-items-center justify-content-center">
-                <button @click="jokerFiftyFifty()" :class="{'opacity-zero': !jokerFiftyFiftyAvailable}" class="joker btn btn-light" type="button">50:50</button>
-                <i @click="jokerAudience()" :class="{'opacity-zero': !jokerAudienceAvailable}" class="joker material-icons btn btn-light mx-2 cursor-pointer">group</i>
-                <i class="joker material-icons">favorite</i>
+                <button @click="jokerFiftyFifty()" :class="{'opacity-zero': !jokerFiftyFiftyAvailable}" class="joker btn btn-light" type="button" title="Remove two wrong answers.">50:50</button>
+                <i @click="jokerAudience()" :class="{'opacity-zero': !jokerAudienceAvailable}" class="joker material-icons btn btn-light mx-2 cursor-pointer" title="Replace the letters A-D with the number of times an answer was chosen by all other players.">group</i>
+                <i @click="jokerTimestop()" :class="{'opacity-zero': !jokerTimestopAvailable}" class="joker material-icons btn btn-light cursor-pointer" title="Take your time. The clock stops and is reset to the value at the beginning of this round.">alarm_off</i>
             </div>
             <div class="col-md-4 d-flex align-items-center justify-content-center">
                 Progress: [[questionsAnswered]]/[[questionsTotal]] | Rank: [[rank]]
@@ -89,7 +89,7 @@
                                 <p v-if="questionsAnswered==1 && gameActive"><b>Hint:</b> Click here to view question again.</p>
                                 <p v-if="questionsAnswered==2 && gameActive"><b>Hint:</b> The explanation below may contain interesting additional information. </p>
                                 <p v-if="questionsAnswered==3 && gameActive"><b>Hint:</b> Take a break, the timer is currently halted.</p>
-                                <p v-if="questionsAnswered==4 && gameActive"><b>Hint:</b> Don't forget you jokers.</p>
+                                <p v-if="questionsAnswered==4 && gameActive"><b>Hint:</b> Don't forget the 3 jokers at the top! Hover over them to get to know them.</p>
                                 <p v-if="questionsAnswered==5 && gameActive"><b>Hint:</b> The game ends immediately upon either closing the browser or even reloading the page while answering a question.</p>
                                 <p v-if="!gameActive">You've successfully answered [[questionsAnswered]] questions in [[formattedTime()]]. <b>This ranks your game [[rank]] out of [[gamesTotal]] total!</b></p>
                                 <h5 class="border-bottom border-light">Explanation</h5>

@@ -75,8 +75,10 @@ class Game(models.Model):
     duration = models.IntegerField(default=0)
     intermezzo_state = models.BooleanField(default=True)
     space = models.ForeignKey('Space', on_delete=models.CASCADE, related_name='games')
-    joker_fiftyfifty_available =models.BooleanField(default=True)
-    joker_audience_available =models.BooleanField(default=True)
+    joker_fiftyfifty_available = models.BooleanField(default=True)
+    joker_audience_available = models.BooleanField(default=True)
+    joker_timestop_available = models.BooleanField(default=True)
+    timestop_active = models.BooleanField(default=False)
 
     def __str__(self):
         return f'Game {self.id}'
