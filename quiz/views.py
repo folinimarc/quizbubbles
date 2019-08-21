@@ -21,8 +21,9 @@ import time
 
 class Login(View):
     def get(self, request):
+        if (request.session.get('spaceid', False)):
+            return redirect('home')
         ctx = {}
-        request.session['spaceid'] = None
         ctx['join_form'] = SpaceJoinForm()
         ctx['create_form'] = SpaceCreateForm()
         ctx['flipShowJoin'] = True
@@ -67,6 +68,14 @@ class Login(View):
             ctx['create_form'] = create_form
             return render(request, 'quiz/login.html', ctx)
 
+        return redirect('login')
+
+
+class Logout(View):
+    def get(self, request):
+        request.session.pop('spaceid', None)
+        request.session.pop('gameid', None)
+        request.session.pop('contributor', None)
         return redirect('login')
 
 
