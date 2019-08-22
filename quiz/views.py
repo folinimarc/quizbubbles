@@ -20,11 +20,20 @@ import time
 
 
 class Login(View):
+
+    def get_public_spaces(self):
+        return Space.objects\
+            .filter(public=True)\
+            .annotate(questions_total=Count('questions'))\
+            .annotate(quizes_total=Count('quizes'))\
+            .order_by('last_access', 'questions_total')
+
     def get(self, request):
         ctx = {}
         ctx['join_form'] = SpaceJoinForm()
         ctx['create_form'] = SpaceCreateForm()
         ctx['flipShowJoin'] = True
+        ctx['spaces'] = self.get_public_spaces()
         return render(request, 'quiz/login.html', ctx)
 
     @transaction.atomic
@@ -50,6 +59,7 @@ class Login(View):
             ctx['flipShowJoin'] = True
             ctx['join_form'] = join_form
             ctx['create_form'] = SpaceCreateForm()
+            ctx['spaces'] = self.get_public_spaces()
             return render(request, 'quiz/login.html', ctx)
 
         # handle create request
@@ -74,6 +84,7 @@ class Login(View):
             ctx['flipShowJoin'] = False
             ctx['join_form'] = SpaceJoinForm()
             ctx['create_form'] = create_form
+            ctx['spaces'] = self.get_public_spaces()
             return render(request, 'quiz/login.html', ctx)
         return redirect('login')
 
