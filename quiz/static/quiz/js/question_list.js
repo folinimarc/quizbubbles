@@ -1,7 +1,7 @@
 "use strict;"
 
 function redrawTable() {
-    $('#question-datatable').DataTable()
+    $('#table').DataTable()
        .rows().invalidate('data')
        .draw(false);
 }
@@ -9,7 +9,8 @@ function redrawTable() {
 $(document).ready(function() {
 
     // init datatable
-    $('#question-datatable').DataTable( {
+    $('#table').DataTable( {
+        responsive: true,
         stateSave: true,
         stateDuration: -1,
         "fnDrawCallback": function( oSettings ) {

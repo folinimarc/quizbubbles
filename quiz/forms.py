@@ -44,7 +44,7 @@ class SpaceJoinForm(forms.ModelForm):
         fields = ('name', 'password')
         widgets = {
             'name': forms.TextInput(attrs={'placeholder': 'Spacename', 'autofocus': 'autofocus'}),
-            'password': forms.PasswordInput(attrs={'placeholder': 'Password (optional)'}),
+            'password': forms.PasswordInput(attrs={'placeholder': 'Password'}),
             }
 
     def __init__(self, *args, **kwargs):

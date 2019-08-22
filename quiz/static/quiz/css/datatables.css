@@ -1,0 +1,39 @@
+.dataTables_info {
+    display: none;
+}
+
+th i.material-icons {
+    font-size: 14px;
+}
+
+.page-link {
+    background-color: transparent !important;
+}
+
+.page-link:focus {
+    box-shadow: none;
+}
+
+.pagination a {
+    color: white;
+}
+
+.dataTables_length select {
+    background-color: transparent !important;
+    color: white;
+}
+
+.page-item.active {
+    background-color: var(--blue)!important;
+}
+
+.page-item.disabled {
+    outline: active;
+}
+
+.page-item.disabled a {
+    border: 1px solid #6c757d !important;
+}
+
+
+

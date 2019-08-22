@@ -32,8 +32,10 @@
         <h2>{{space_name}} {% if not authenticated %}(guest){% endif %} <a href="{% url 'logout' space_name=space_name %}" class="btn-mini btn btn-outline-light">Leave</a></h2>
     </div>
     <div class="col-md-6 d-flex flex-column justify-content-center align-items-end">
-        <span>{{nr_questions}} questions</span>
-        <span>{{nr_quizes}} quizes played</span>
+        <div>
+            <span>{{nr_questions}} questions</span>
+            <span>{{nr_quizes}} quizes played</span>
+        </div>
     </div>
 </div>
 <div class="row mb-5">

@@ -8,7 +8,7 @@ https://1stwebdesigner.com/15-css-background-effects/
         background-position: 0% 50%;
     }
     50% {
-        background-position: 100% 50%;
+        background-position: 95% 50%;
     }
     100% {
         background-position: 0% 49.9%;
@@ -20,7 +20,7 @@ body {
     width: 100%;
     height: 100vh;
     background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
-    background-size: 400% 400%;
+    background-size: 800% 800%;
     animation-delay: 1s;
-    animation: gradientBG 10s ease infinite;
+    animation: gradientBG 15s ease infinite;
 }

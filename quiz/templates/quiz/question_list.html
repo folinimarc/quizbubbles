@@ -3,7 +3,7 @@
 
 {% block css %}
 <link rel="stylesheet" href="{% static 'quiz/css/thirdparty/dataTables.bootstrap4.min.css' %}">
-<link rel="stylesheet" href="{% static 'quiz/css/question_list.css' %}">
+<link rel="stylesheet" href="{% static 'quiz/css/datatables.css' %}">
 {% endblock %}
 
 {% block js %}
@@ -36,7 +36,7 @@
     <!-- question list -->
     <div class="row">
         <div class="col-12">
-            <table id="question-datatable" class="table table-striped table-bordered" style="width:100%">
+            <table id="table" class="table table-striped table-bordered" style="width:100%">
                 <thead>
                     <tr>
                         <th>id</th>
