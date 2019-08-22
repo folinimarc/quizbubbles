@@ -1,0 +1,53 @@
+{% extends 'quiz/base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+{% load crispy_forms_field %}
+
+{% block css %}
+{% endblock %}
+
+
+{% block js %}
+{% endblock %}
+
+
+{% block content %}
+{% csrf_token %}
+
+<!-- messages -->
+{% include 'quiz/includes/messages.html' %}
+<!-- nav -->
+{% include 'quiz/includes/nav_settings.html' %}
+
+<form class="hide-labels smaller-controls" method="post">
+{% csrf_token %}
+<!-- settings-->
+<div class="row">
+    <div class="col-md-6 mb-3">
+        <!-- settings -->
+        <div class="p-4 text-light bordered bg-primary d-flex justify-content-center align-items-center">
+            <div>
+                <h5 class="mb-4 text-light text-center border-bottom border-light">Edit space</h5>
+                {{ change_form.name|as_crispy_field }}
+                {{ change_form.email|as_crispy_field }}
+                {{ change_form.public|as_crispy_field }}
+                {{ change_form.password1|as_crispy_field }}
+                {{ change_form.password2|as_crispy_field }}
+                <button type="submit" name="change" class="btn btn-success btn-block">Save changes</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 mb-3">
+        <!-- delete -->
+        <div class="p-4 text-light bordered bg-danger d-flex justify-content-center align-items-center">
+            <div>
+                <h5 class="mb-3 text-light text-center border-bottom border-light">Danger zone!</h5>
+                {{ delete_form.delete_confirm|as_crispy_field }}
+                <button type="submit" name="delete" class="btn btn-outline-light btn-block">Delete space</button>
+            </div>
+        </div>
+    </div>
+</div>
+</form>
+
+{% endblock %}

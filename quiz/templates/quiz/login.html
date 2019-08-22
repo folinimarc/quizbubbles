@@ -15,6 +15,7 @@
 <script src="{% static 'quiz/js/thirdparty/jquery-3.4.1.min.js' %}"></script>
 <script src="{% static 'quiz/js/thirdparty/jquery.dataTables.min.js' %}"></script>
 <script src="{% static 'quiz/js/thirdparty/dataTables.bootstrap4.min.js' %}"></script>
+<script src="{% static 'quiz/js/messages.js' %}"></script>
 <script src="{% static 'quiz/js/ajax.js' %}"></script>
 <script src="{% static 'quiz/js/login.js' %}"></script>
 <script src="{% static 'quiz/js/public_spaces_list.js' %}"></script>
@@ -27,16 +28,18 @@
     <span class="text-light spinner-border"></span>
 </div>
 <section id="main-container" class="opacity-zero opacity-fade">
+    <!-- messages -->
+    {% include 'quiz/includes/messages.html' %}
     <div class="row mt-5">
         <!-- join / create -->
         <div class="col-12">
-            <h2 class="text-white border-bottom border-light mb-3">Welcome to QuizSpace</h2>
+            <h2 class="text-white text-center border-bottom border-light mb-3">Welcome to QuizSpace</h2>
             <!-- flipcard -->
             <div id="flipcard" class="{% if not flipShowJoin %}flipped{% endif %} flip-card">
                 <div class="content">
                     <!-- front -->
                     <div class="front p-4 bordered bg-primary d-flex justify-content-center align-items-center">
-                        <form method="post">
+                        <form class="hide-labels smaller-controls" method="post">
                             {% csrf_token %}
                             {{ join_form|crispy }}
                             <div class="form-row">
@@ -51,7 +54,7 @@
                     </div>
                     <!-- back -->
                     <div class="back p-4 bordered bg-primary d-flex justify-content-center align-items-center">
-                        <form method="post">
+                        <form class="hide-labels smaller-controls" method="post">
                             {% csrf_token %}
                             {{ create_form|crispy }}
                             <div class="form-row">
@@ -71,7 +74,7 @@
     <div class="row my-5">
         <!-- public quizes list -->
         <div class="col-12">
-            <h2 class="text-white border-bottom border-light mb-3">Join a public quiz</h2>
+            <h2 class="text-white text-center border-bottom border-light mb-3">Join a public quiz</h2>
             {% include 'quiz/includes/public_spaces_list.html' %}
         </div>
     </div>

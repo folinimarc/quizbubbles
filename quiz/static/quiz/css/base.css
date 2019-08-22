@@ -1,3 +1,20 @@
+.hide-labels label:not(.form-check-label) {
+    display: none;
+}
+
+.form-text.text-muted {
+    color: white !important;
+}
+
+.smaller-controls .form-control {
+    font-size: 0.9rem;
+}
+
+button > i.material-icons {
+    font-size: 16px;
+}
+
+
 .nav-row .btn:not(:hover) {
     color: white;
     border-color: white;

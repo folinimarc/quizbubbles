@@ -2,18 +2,6 @@
     transition: height 0.5s;
 }
 
-#flipcard label:not(.form-check-label) {
-    display: none;
-}
-
-.form-control {
-    font-size: 0.9rem;
-}
-
-button > i.material-icons {
-    font-size: 16px;
-}
-
 #table {
     font-size: 12px;
 }

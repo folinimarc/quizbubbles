@@ -63,7 +63,7 @@ class SpaceCreateForm(forms.ModelForm):
         fields = ('name', 'email', 'password1', 'password2', 'public')
         widgets = {
             'name': forms.TextInput(attrs={'placeholder': 'Spacename'}),
-            'email': forms.TextInput(attrs={'placeholder': 'Email'}),
+            'email': forms.TextInput(attrs={'placeholder': 'Email (public)'}),
             }
         labels = {
             'public': 'Public Quizspace'
@@ -75,3 +75,26 @@ class SpaceCreateForm(forms.ModelForm):
         password2 = cleaned_data.get('password2')
         if password1 != password2:
             self.add_error('password2', 'Passwords did not match.')
+        space = Space.objects.filter(name=cleaned_data['name'])
+        if space and space[0].uuid != self.instance.uuid:
+            self.add_error('name', 'Name already in use')
+
+
+class SpaceChangeForm(SpaceCreateForm):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['password1'].required = False
+        self.fields['password2'].required = False
+
+    password2 = forms.CharField(max_length=20, help_text='Leave both blank to keep old password.', widget=forms.PasswordInput(attrs={'placeholder': 'Repeat Password'}))
+
+
+class SpaceDeleteForm(forms.Form):
+
+    delete_confirm = forms.CharField(required=False, help_text='Type "DELETE" to confirm.')
+    
+    def clean(self):
+        cleaned_data = super(SpaceDeleteForm, self).clean()
+        if cleaned_data['delete_confirm'] != 'DELETE':
+            self.add_error('delete_confirm', 'Type DELETE to confirm.')

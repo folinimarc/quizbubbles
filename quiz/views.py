@@ -96,6 +96,55 @@ class Logout(View):
         return redirect('login')
 
 
+class SendMail(View):
+    def get(self, request, space_name):
+        ctx = {}
+        return render(request, 'quiz/send_mail.html', ctx)
+
+
+@method_decorator([check_space_permission], name='dispatch')
+class Settings(View):
+    def get(self, request, space_name):
+        ctx = {}
+        ctx['space_name'] = space_name
+        space = Space.objects.get(name=space_name)
+        ctx['change_form'] = SpaceChangeForm(instance=space)
+        ctx['delete_form'] = SpaceDeleteForm()
+        return render(request, 'quiz/settings.html', ctx)
+
+    @transaction.atomic
+    def post(self, request, space_name):
+        ctx = {}
+        ctx['space_name'] = space_name
+        space = Space.objects.get(name=space_name)
+        if 'delete' in request.POST:
+            delete_form = SpaceDeleteForm(request.POST)
+            if delete_form.is_valid():
+                space.delete()
+                messages.info(request, f'Space {space_name} was successfully deleted!')
+                return redirect('logout', space_name=space_name)
+            else:
+                ctx['change_form'] = SpaceChangeForm(instance=space)
+                ctx['delete_form'] = delete_form
+                return render(request, 'quiz/settings.html', ctx)
+        if 'change' in request.POST:
+            change_form = SpaceChangeForm(request.POST, instance=space)
+            if change_form.is_valid():
+                new_space_name = change_form.cleaned_data['name']
+                request.session[new_space_name] = request.session[space_name]
+                space = change_form.save(commit=False)
+                space.password = make_password(change_form.cleaned_data['password1'])
+                space.save()
+                messages.info(request, f'Edits were successfully applied!')
+                return redirect('home', space_name=new_space_name)
+            else: 
+                ctx['change_form'] = change_form
+                ctx['delete_form'] = SpaceDeleteForm()
+                return render(request, 'quiz/settings.html', ctx)
+        messages.info(request, f'You reached a deep dark point where you should not be... There are dragons! Please report this.')
+        return redirect('home', space_name=space_name)
+
+
 @method_decorator([check_space_permission], name='dispatch')
 class Home(View):
 

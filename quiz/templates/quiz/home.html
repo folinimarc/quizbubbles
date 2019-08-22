@@ -29,13 +29,18 @@
 <!-- header -->
 <div class="row my-4 text-light">
     <div class="col-md-6 d-flex justify-content-start align-items-center">
-        <h2>{{space_name}} {% if not authenticated %}(guest){% endif %} <a href="{% url 'logout' space_name=space_name %}" class="btn-mini btn btn-outline-light">Leave</a></h2>
+        <h2>{{space_name}} 
+            {% if not authenticated %}
+            (guest)
+            {% else %}
+            <a href="{% url 'settings' space_name=space_name %}" class="btn-mini btn btn-outline-light">Settings</a>
+            {% endif %} 
+            <a href="{% url 'logout' space_name=space_name %}" class="btn-mini btn btn-outline-light">Leave</a>
+        </h2>
     </div>
     <div class="col-md-6 d-flex flex-column justify-content-center align-items-end">
-        <div>
-            <span>{{nr_questions}} questions</span>
-            <span>{{nr_quizes}} quizes played</span>
-        </div>
+        <span>{{nr_questions}} questions</span>
+        <span>{{nr_quizes}} quizes played</span>
     </div>
 </div>
 <div class="row mb-5">
