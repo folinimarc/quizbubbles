@@ -47,15 +47,19 @@ class Login(View):
                 password = join_form.cleaned_data.get('password', None)
                 if not space:
                     join_form.add_error('name', 'Spacename does not exist')
-                elif not space.public and not password:
-                    join_form.add_error('password', 'This space requires a password')
-                elif not space.public and not check_password(password, space.password):
-                    join_form.add_error('password', 'Invalid password')
+                elif not password:
+                    if space.public:
+                        return redirect('home', space_name=space.name)
+                    else:
+                        join_form.add_error('password', 'This space requires a password')
                 else:
-                    if password:
+                    if check_password(password, space.password):
                         request.session[space.name] = str(space.uuid)
                         request.session.set_expiry(0)
-                    return redirect('home', space_name=space.name)
+                        return redirect('home', space_name=space.name)
+                    else:
+                        join_form.add_error('password', 'Invalid password.')
+                        join_form.add_error('password', '(leave blank to access public space as guest)')
             ctx['flipShowJoin'] = True
             ctx['join_form'] = join_form
             ctx['create_form'] = SpaceCreateForm()
@@ -66,21 +70,17 @@ class Login(View):
         if 'create' in request.POST:
             create_form = SpaceCreateForm(request.POST)
             if create_form.is_valid():
-                # Enforce uniqueness of name
-                if Space.objects.filter(name=create_form.cleaned_data['name']).exists():
-                    create_form.add_error('name', 'Name already in use')
-                else:
-                    # create quizespace
-                    space = Space.objects.create(
-                        name = create_form.cleaned_data['name'],
-                        email = create_form.cleaned_data['email'],
-                        password = make_password(create_form.cleaned_data['password1']),
-                        public = create_form.cleaned_data['public']
-                    )
-                    messages.info(request, f'New quizespace \"{create_form.cleaned_data["name"]}\" successfully created. Have fun!')
-                    request.session[space.name] = str(space.uuid)
-                    request.session.set_expiry(0)
-                    return redirect('home', space_name=space.name)
+                # create quizespace
+                space = Space.objects.create(
+                    name = create_form.cleaned_data['name'],
+                    email = create_form.cleaned_data['email'],
+                    password = make_password(create_form.cleaned_data['password1']),
+                    public = create_form.cleaned_data['public']
+                )
+                messages.info(request, f'New quizespace \"{create_form.cleaned_data["name"]}\" successfully created. Have fun!')
+                request.session[space.name] = str(space.uuid)
+                request.session.set_expiry(0)
+                return redirect('home', space_name=space.name)
             ctx['flipShowJoin'] = False
             ctx['join_form'] = SpaceJoinForm()
             ctx['create_form'] = create_form
