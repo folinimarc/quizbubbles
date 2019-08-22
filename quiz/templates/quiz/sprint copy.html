@@ -34,9 +34,9 @@
                     <div class="content">
                         <!-- front question -->
                         <div class="front interactive-card bg-primary text-light p-2 center-content">
-                            <div v-if="!gameStarted">
+                            <div v-if="!quizStarted">
                                 <p class="text-light">Click the question anytime to access jokers and check the timer.</p>
-                                <button @click.stop="startGame();" class="btn btn-success btn-block">Start</button>
+                                <button @click.stop="startQuiz();" class="btn btn-success btn-block">Start</button>
                             </div>
                             <div v-else-if="loading">
                                 <div class="spinner-border" role="status"></div>

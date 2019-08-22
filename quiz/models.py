@@ -53,18 +53,18 @@ class Question(models.Model):
     def __str__(self):
         return f'Q{self.pk} - {self.question[:10]}'
 
-class Game(models.Model):
+class Quiz(models.Model):
     SPRINT = 0
     MARATHON = 1
-    GAMETYPE = (
+    QUIZTYPE = (
         (SPRINT, 'Sprint'),
         (MARATHON, 'Marathon'),
     )
 
     uuid = models.UUIDField(default=uuid.uuid4)
-    gametype = models.IntegerField(choices=GAMETYPE)
+    quiztype = models.IntegerField(choices=QUIZTYPE)
     active = models.BooleanField(default=True)
-    player = models.CharField(max_length=10)
+    username = models.CharField(max_length=10)
     questions_answered = models.IntegerField(default=0)
     questions_total = models.IntegerField(default=0)
     question_ids = models.TextField()
@@ -74,22 +74,23 @@ class Game(models.Model):
     helperdatetime = models.DateTimeField(null=True, blank=True)
     duration = models.IntegerField(default=0)
     intermezzo_state = models.BooleanField(default=True)
-    space = models.ForeignKey('Space', on_delete=models.CASCADE, related_name='games')
+    space = models.ForeignKey('Space', on_delete=models.CASCADE, related_name='quizes')
     joker_fiftyfifty_available = models.BooleanField(default=True)
     joker_audience_available = models.BooleanField(default=True)
     joker_timestop_available = models.BooleanField(default=True)
     timestop_active = models.BooleanField(default=False)
 
     def __str__(self):
-        return f'Game {self.id}'
+        return f'Quiz {self.id}'
 
 class Space(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4)
-    name = models.CharField(max_length=20)
+    name = models.SlugField(max_length=20)
     email = models.EmailField()
     password = models.CharField(max_length=20)
     created = models.DateTimeField(auto_now_add=True)
     last_access = models.DateTimeField(auto_now=True)
+    public = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name

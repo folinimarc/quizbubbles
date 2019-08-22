@@ -24,7 +24,7 @@
         <div id="flipcard" class="{% if not flipShowJoin %}flipped{% endif %} flip-card h-330px">
             <div class="content">
                 <!-- front -->
-                <div class="front bordered bg-primary d-flex justify-content-center align-items-center">
+                <div class="front p-4 bordered bg-primary d-flex justify-content-center align-items-center">
                     <form method="post">
                         {% csrf_token %}
                         {{ join_form|crispy }}
@@ -39,7 +39,7 @@
                     </form>
                 </div>
                 <!-- back -->
-                <div class="back bordered bg-primary d-flex justify-content-center align-items-center">
+                <div class="back p-4 bordered bg-primary d-flex justify-content-center align-items-center">
                     <form method="post">
                         {% csrf_token %}
                         {{ create_form|crispy }}

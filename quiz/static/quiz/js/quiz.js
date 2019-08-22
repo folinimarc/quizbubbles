@@ -7,15 +7,15 @@ var app = new Vue({
   data: {
     messages: [],
     errorOccured: false,
-    gameStarted: false,
-    gameActive: true,
+    quizStarted: false,
+    quizActive: true,
     awaitingAnswer: false,
     flipShowQuestion: false,
     timePassed: 0,
     loading: true,
-    gamesTotal: 0,
+    quizesTotal: 0,
     rank: 0,
-    gametype: 'Loading...',
+    quiztype: 'Loading...',
     question: {'header': '', 'body': ''},
     questionExplanation: '',
     questionsAnswered: 0,
@@ -38,11 +38,11 @@ var app = new Vue({
     window.addEventListener('beforeunload', this.handleLeave);
     /* make content visible */
     document.getElementById('app-wrapper').classList.remove('opacity-zero');
-    /* start game */
+    /* start quiz */
     setTimeout(function() {
-      this.getGameData();
+      this.getQuizData();
       setTimeout(function() {
-        this.gameStarted = true;
+        this.quizStarted = true;
       }.bind(this), 2000);
     }.bind(this), 1000);
   },
@@ -87,12 +87,12 @@ var app = new Vue({
         this.startTimer();
       }.bind(this), 1000)
     },
-    getGameData: function() {
-      this.ajaxPost({'action':'getGameData'}, function(response) {
+    getQuizData: function() {
+      this.ajaxPost({'action':'getQuizData'}, function(response) {
         const data = response.data;
         this.timePassed = data['timePassed'];
-        this.gamesTotal = data['gamesTotal'];
-        this.gametype = data['gametype'];
+        this.quizesTotal = data['quizesTotal'];
+        this.quiztype = data['quiztype'];
         this.rank = data['rank'];
         this.questionsAnswered = data['questionsAnswered'];
         this.questionsTotal = data['questionsTotal'];
@@ -126,7 +126,7 @@ var app = new Vue({
       this.timePassed = data['timePassed'];
       this.correctAnswer = data['correctAnswer'];
       this.rank = data['rank'];
-      this.gameActive = data['gameActive'];
+      this.quizActive = data['quizActive'];
       this.questionsAnswered = data['questionsAnswered'];
       this.questionExplanation = data['questionExplanation'];
       this.flipShowQuestion = false;
@@ -169,8 +169,8 @@ var app = new Vue({
       return minutes.toString() + ':' + padding + seconds.toString();
     },
     handleLeave: function() {
-      if (this.gameActive) {
-        this.ajaxPost({'action':'closeGame'}, function(response) {});
+      if (this.quizActive) {
+        this.ajaxPost({'action':'closeQuiz'}, function(response) {});
       }
     },
     handleError: function(errorMsg) {

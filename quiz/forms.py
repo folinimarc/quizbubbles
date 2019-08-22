@@ -30,10 +30,10 @@ class FormErrorsMixin:
             self.is_valid()
         return ' '.join([' '.join(set([x for l in self.errors.values() for x in l]))])
 
-class GamePlayernameGametypeForm(FormErrorsMixin, forms.ModelForm):
+class QuizUsernamenameQuiztypeForm(FormErrorsMixin, forms.ModelForm):
     class Meta:
-        model = Game
-        fields = ('player', 'gametype')
+        model = Quiz
+        fields = ('username', 'quiztype')
 
 
 class SpaceJoinForm(forms.ModelForm):
@@ -44,8 +44,12 @@ class SpaceJoinForm(forms.ModelForm):
         fields = ('name', 'password')
         widgets = {
             'name': forms.TextInput(attrs={'placeholder': 'Spacename', 'autofocus': 'autofocus'}),
-            'password': forms.PasswordInput(attrs={'placeholder': 'Password'}),
+            'password': forms.PasswordInput(attrs={'placeholder': 'Password (optional)'}),
             }
+
+    def __init__(self, *args, **kwargs):
+        super(SpaceJoinForm, self).__init__(*args, **kwargs)
+        self.fields['password'].required = False
 
 
 class SpaceCreateForm(forms.ModelForm):
@@ -56,11 +60,14 @@ class SpaceCreateForm(forms.ModelForm):
     prefix='create'
     class Meta:
         model = Space
-        fields = ('name', 'email')
+        fields = ('name', 'email', 'password1', 'password2', 'public')
         widgets = {
             'name': forms.TextInput(attrs={'placeholder': 'Spacename'}),
             'email': forms.TextInput(attrs={'placeholder': 'Email'}),
             }
+        labels = {
+            'public': 'Public Quizspace'
+        }
 
     def clean(self):
         cleaned_data = super(SpaceCreateForm, self).clean()

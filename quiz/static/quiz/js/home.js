@@ -1,16 +1,16 @@
 "use strict";
 
-// start games functions
+// start quizes functions
 function start_sprint() {
-    const player = document.querySelector('input[name=player-sprint]').value;
-    const gametype = 0;
-    ajax_submit({'action': 'startSprint', 'player': player, 'gametype': gametype}, 'error-message-sprint');
+    const username = document.querySelector('input[name=username-sprint]').value;
+    const quiztype = 0;
+    ajax_submit({'action': 'startSprint', 'username': username, 'quiztype': quiztype}, 'error-message-sprint');
 }
 
 function start_marathon() {
-    const player = document.querySelector('input[name=player-marathon]').value;
-    const gametype = 1;
-    ajax_submit({'action': 'startMarathon', 'player': player, 'gametype': gametype}, 'error-message-marathon');
+    const username = document.querySelector('input[name=username-marathon]').value;
+    const quiztype = 1;
+    ajax_submit({'action': 'startMarathon', 'username': username, 'quiztype': quiztype}, 'error-message-marathon');
 }
 
 // give focus to inputs upon hovering
@@ -27,7 +27,7 @@ Array.from(document.querySelectorAll('.flip-card')).forEach(function(el) {
 var sprintBtn = document.getElementById('btn-start-sprint');
 if (sprintBtn) {
     sprintBtn.addEventListener('click', start_sprint);
-    document.querySelector('input[name=player-sprint]').addEventListener('keydown', function(event) {
+    document.querySelector('input[name=username-sprint]').addEventListener('keydown', function(event) {
         if (event.keyCode == 13) {
             start_sprint();
         }
@@ -37,7 +37,7 @@ if (sprintBtn) {
 var marathonBtn = document.getElementById('btn-start-marathon');
 if (marathonBtn) {
     marathonBtn.addEventListener('click', start_marathon);
-    document.querySelector('input[name=player-marathon]').addEventListener('keydown', function(event) {
+    document.querySelector('input[name=username-marathon]').addEventListener('keydown', function(event) {
         if (event.keyCode == 13) {
             start_marathon();
         }

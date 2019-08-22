@@ -29,22 +29,22 @@
 <!-- header -->
 <div class="row my-4 text-light">
     <div class="col-md-6 d-flex justify-content-start align-items-center">
-        <h2>{{space_name}} <a href="{% url 'logout' %}" class="btn-mini btn btn-outline-light">Logout</a></h2>
+        <h2>{{space_name}} {% if not authenticated %}(guest){% endif %} <a href="{% url 'logout' space_name=space_name %}" class="btn-mini btn btn-outline-light">Leave</a></h2>
     </div>
     <div class="col-md-6 d-flex flex-column justify-content-center align-items-end">
         <span>{{nr_questions}} questions</span>
-        <span>{{nr_games}} games played</span>
+        <span>{{nr_quizes}} quizes played</span>
     </div>
 </div>
 <div class="row mb-5">
-    <div class="col-md-4 mb-3">
+    <div class="{% if authenticated %}col-md-4{% else %}col-md-6{% endif %} mb-3">
         <!-- Play sprint -->
         <div class="flip-card hoverable h-200px">
             <div class="content">
-                <div class="front bordered cursor-pointer bg-primary text-light p-5 d-flex justify-content-center align-items-center">
-                    <span><i class="material-icons">directions_run</i>Sprint</span>
+                <div class="front h-100 bordered cursor-pointer bg-primary text-light p-5 d-flex justify-content-center align-items-center">
+                    <div class="text-center"><i class="material-icons">directions_run</i>Sprint</div>
                 </div>
-                <div class="back bordered cursor-pointer bg-primary text-light p-3 d-flex justify-content-center align-items-center">
+                <div class="back h-100 bordered cursor-pointer bg-primary text-light p-3 d-flex justify-content-center align-items-center">
                     <div>
                         {% if not enough_questions %}
                             <p>Not enough questions...</p>
@@ -55,7 +55,7 @@
                         <p class="text-light">{{nr_sprint_questions}} questions in ascending difficulty. Go for it!</p>
                         <div class="form-group">
                             <div class="input-group">
-                                <input class="form-control" name="player-sprint" placeholder="Name" type="text">
+                                <input class="form-control" name="username-sprint" placeholder="Name" type="text" value="{{username}}"" onfocus="var temp_value=this.value; this.value=''; this.value=temp_value">
                                 <div class="input-group-append">
                                     <button id="btn-start-sprint" class="btn btn-success btn-block">Go</button>
                                 </div>
@@ -68,50 +68,52 @@
             </div>
         </div>
     </div>
-    <div class="col-md-4 mb-3">
+    <div class="{% if authenticated %}col-md-4{% else %}col-md-6{% endif %} mb-3">
         <!-- Play marathon -->
         <div class="flip-card hoverable h-200px">
             <div class="content">
-                <div class="front bordered cursor-pointer bg-primary text-light p-5 d-flex justify-content-center align-items-center">
-                    <span><i class="material-icons">directions_bike</i> Marathon</span>
+                <div class="front h-100 bordered cursor-pointer bg-primary text-light p-5 d-flex justify-content-center align-items-center">
+                    <div class="text-center"><i class="material-icons">directions_bike</i> Marathon</div>
                 </div>
-                <div class="back bordered cursor-pointer bg-primary text-light p-3 d-flex justify-content-center align-items-center">
+                <div class="back h-100 bordered cursor-pointer bg-primary text-light p-3 d-flex justify-content-center align-items-center">
                     <div>
                         {% if nr_questions < 1 %}
-                        <p>No questions yet...</p>
+                        <p class="m-0">At least one question required...</p>
                         {% else %}
                         <p class="text-light">All questions ({{nr_questions}}) in random order. Good luck!</p>
                         <div class="form-group">
                             <div class="input-group">
-                                <input class="form-control" name="player-marathon" placeholder="Name" type="text">
+                                <input class="form-control" name="username-marathon" placeholder="Name" type="text" value="{{username}}" onfocus="var temp_value=this.value; this.value=''; this.value=temp_value">
                                 <div class="input-group-append">
                                     <button id="btn-start-marathon" class="btn btn-success btn-block">Go</button>
                                 </div>
                             </div>
                         </div>
-                        {% endif %}
                         <small id="error-message-marathon" class="error-message text-white m-0" style="opacity:0;"></small>
+                        {% endif %}
                     </div>
                 </div>
             </div>
         </div>
     </div>
+    {% if authenticated %}
     <div class="col-md-4 mb-3">
         <!-- Contribute question -->
         <div class="flip-card hoverable h-200px">
             <div class="content">
-                <div class="front bordered cursor-pointer bg-success text-light p-5 d-flex justify-content-center align-items-center">
-                    <span><i class="material-icons">add_circle_outline</i>Contribute</span>
+                <div class="front h-100 bordered cursor-pointer bg-success text-light p-5 d-flex justify-content-center align-items-center">
+                    <div class="text-center"><i class="material-icons">add_circle_outline</i>Contribute</div>
                 </div>
-                <div class="back bordered cursor-pointer bg-success text-light p-3 d-flex justify-content-center align-items-center">
+                <div class="back h-100 bordered cursor-pointer bg-success text-light p-3 d-flex justify-content-center align-items-center">
                     <div class="nav-row">
-                        <a href="{% url 'new_question' %}" class="btn btn-outline-primary btn-block mb-4">Add question</a>
-                        <a href="{% url 'question_list' %}" class="btn btn-outline-primary btn-block">Edit question</a>
+                        <a href="{% url 'new_question' space_name=space_name %}" class="btn btn-outline-primary btn-block mb-4">Add question</a>
+                        <a href="{% url 'question_list' space_name=space_name %}" class="btn btn-outline-primary btn-block">Edit question</a>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+    {% endif %}
 </div>
 <div class="row mb-5">
     <div class="col-md-6">

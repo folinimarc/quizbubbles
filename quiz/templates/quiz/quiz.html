@@ -28,15 +28,15 @@
         <!-- header -->
         <div class="row text-light my-3 justify-content-between">
             <div class="col-md-2 text-center d-flex align-items-center justify-content-center">
-                <h5 class="m-0">[[gametype]]</h5>
-                <a href="{% url 'home' %}" class="ml-2 btn btn-mini btn-outline-light">Cancel</a>
+                <h5 class="m-0">[[quiztype]]</h5>
+                <a href="{% url 'home' space_name=space_name %}" class="ml-2 btn btn-mini btn-outline-light">Leave</a>
             </div>
             <div class="col-md-1 text-center d-flex align-items-center justify-content-center p-2">
                 <span :class="{'opacity-zero': !loading}" class="opacity-fade spinner-border"></span>
             </div>
             <div class="col-md-3 d-flex align-items-center justify-content-center">
                 <button @click="jokerFiftyFifty()" :class="{'opacity-zero': !jokerFiftyFiftyAvailable}" class="joker btn btn-light" type="button" title="Remove two wrong answers.">50:50</button>
-                <i @click="jokerAudience()" :class="{'opacity-zero': !jokerAudienceAvailable}" class="joker material-icons btn btn-light mx-2 cursor-pointer" title="Replace the letters A-D with the number of times an answer was chosen by all other players.">group</i>
+                <i @click="jokerAudience()" :class="{'opacity-zero': !jokerAudienceAvailable}" class="joker material-icons btn btn-light mx-2 cursor-pointer" title="Replace the letters A-D with the number of times an answer was chosen by all other usernames.">group</i>
                 <i @click="jokerTimestop()" :class="{'opacity-zero': !jokerTimestopAvailable}" class="joker material-icons btn btn-light cursor-pointer" title="Take your time. The clock stops and is reset to the value at the beginning of this round.">alarm_off</i>
             </div>
             <div class="col-md-4 d-flex align-items-center justify-content-center">
@@ -50,13 +50,13 @@
         <div class="row">
             <div class="col-12">
                 <!-- flipcard question -->
-                <div @click="flipQuestion()" :class="{flipped: flipShowQuestion, 'cursor-pointer': !awaitingAnswer && gameStarted}" class="flip-card h-240px">
+                <div @click="flipQuestion()" :class="{flipped: flipShowQuestion, 'cursor-pointer': !awaitingAnswer && quizStarted}" class="flip-card h-240px">
                     <div class="content">
                         <!-- front question -->
-                        <div class="front overflow-auto bordered noselect text-light p-4"
+                        <div class="front h-100 overflow-auto bordered noselect text-light p-4"
                             :class="[getQuestionClass()]">
-                            <div v-if="!gameStarted && !errorOccured" class="stretch-out d-flex justify-content-center align-items-center">
-                                <h3 class="m-0">Good luck!</h3>
+                            <div v-if="!quizStarted && !errorOccured" class="stretch-out d-flex justify-content-center align-items-center">
+                                <h3 class="m-0">Good luck, {{request.session.username}}!</h3>
                             </div>
                             <!-- display error -->
                             <div v-if="errorOccured" class="stretch-out d-flex align-items-center justify-content-center flex-column">
@@ -64,40 +64,40 @@
                                     <i class="material-icons d-block">mood_bad</i>
                                     <h3 class="my-2">Oh no, something went wrong!</h3>
                                 </div>
-                                <a @click.stop="" href="{% url 'home' %}" class="btn btn-success d-inline-block">Restart</a>
+                                <a @click.stop="" href="{% url 'home' space_name=space_name %}" class="btn btn-success d-inline-block">Back home</a>
                             </div>
-                            <div v-if="gameStarted && !errorOccured">
+                            <div v-if="quizStarted && !errorOccured">
                                 <!-- display SUCCESS -->
                                 <div class="d-flex justify-content-start align-items-center mb-3">
                                     <template v-if="chosenAnswer===correctAnswer">
                                         <i class="material-icons">sentiment_very_satisfied</i>
-                                        <template v-if="gameActive">
+                                        <template v-if="quizActive">
                                             <h3 class="mb-0 mr-4">Correct!</h3>
                                             <button @click.stop="nextQuestion();" class="btn btn-primary">Next question</button>
                                         </template>
                                         <template v-else>
                                             <h3 class="mb-0 mr-4">You did it!</h3>
-                                            <a @click.stop="" href="{% url 'home' %}" class="btn btn-primary">Restart</a>
+                                            <a @click.stop="" href="{% url 'home' space_name=space_name %}" class="btn btn-primary">Back home</a>
                                         </template>
                                     </template>
                                     <template v-else>
                                         <i class="material-icons">sentiment_very_dissatisfied</i>
-                                        <h3 class="mb-0 mr-4">Game over!</h3>
-                                        <a @click.stop="" href="{% url 'home' %}" class="btn btn-primary">Restart</a>
+                                        <h3 class="mb-0 mr-4">Quiz over!</h3>
+                                        <a @click.stop="" href="{% url 'home' space_name=space_name %}" class="btn btn-primary">Back home</a>
                                     </template>
                                 </div>
-                                <p v-if="questionsAnswered==1 && gameActive"><b>Hint:</b> Click here to view question again.</p>
-                                <p v-if="questionsAnswered==2 && gameActive"><b>Hint:</b> The explanation below may contain interesting additional information. </p>
-                                <p v-if="questionsAnswered==3 && gameActive"><b>Hint:</b> Take a break, the timer is currently halted.</p>
-                                <p v-if="questionsAnswered==4 && gameActive"><b>Hint:</b> Don't forget the 3 jokers at the top! Hover over them to get to know them.</p>
-                                <p v-if="questionsAnswered==5 && gameActive"><b>Hint:</b> The game ends immediately upon either closing the browser or even reloading the page while answering a question.</p>
-                                <p v-if="!gameActive">You've successfully answered [[questionsAnswered]] questions in [[formattedTime()]]. <b>This ranks your game [[rank]] out of [[gamesTotal]] total!</b></p>
+                                <p v-if="questionsAnswered==1 && quizActive"><b>Hint:</b> Click here to view question again.</p>
+                                <p v-if="questionsAnswered==2 && quizActive"><b>Hint:</b> The explanation below may contain interesting additional information. </p>
+                                <p v-if="questionsAnswered==3 && quizActive"><b>Hint:</b> Take a break, the timer is currently halted.</p>
+                                <p v-if="questionsAnswered==4 && quizActive"><b>Hint:</b> Don't forget the 3 jokers at the top! Hover over them to get to know them.</p>
+                                <p v-if="questionsAnswered==5 && quizActive"><b>Hint:</b> The quiz ends immediately upon either closing the browser or even reloading the page while answering a question.</p>
+                                <p v-if="!quizActive">You've successfully answered [[questionsAnswered]] questions in [[formattedTime()]]. <b>This ranks your quiz [[rank]] out of [[quizesTotal]] total!</b></p>
                                 <h5 class="border-bottom border-light">Explanation</h5>
                                 <p>[[questionExplanation]]</p>
                             </div>
                         </div>
                         <!-- back question -->
-                        <div class="back bordered noselect bg-primary text-light p-4 overflow-auto d-flex">
+                        <div class="back h-100 bordered noselect bg-primary text-light p-4 overflow-auto d-flex">
                             <div class="stretch-out question">
                                 <h3>[[question.header]]</h3>
                                 <p>[[question.body]]</p>

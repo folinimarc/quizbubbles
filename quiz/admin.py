@@ -27,12 +27,12 @@ class QuestionAdmin(admin.ModelAdmin):
         }),
     )
 
-@admin.register(Game)
-class GameAdmin(admin.ModelAdmin):
+@admin.register(Quiz)
+class QuizAdmin(admin.ModelAdmin):
     readonly_fields = ('uuid',)
     list_select_related = ('space',)
-    list_display = ('id', 'player', 'gametype', 'questions_total', 'active', 'duration', 'enddatetime', 'last_access','space')
-    search_fields = ('player', 'gametype', 'questions_total', 'active', 'duration', 'enddatetime', 'last_access', 'space')
+    list_display = ('id', 'username', 'quiztype', 'questions_total', 'active', 'duration', 'enddatetime', 'last_access','space')
+    search_fields = ('username', 'quiztype', 'questions_total', 'active', 'duration', 'enddatetime', 'last_access', 'space')
 
 
 @admin.register(Space)

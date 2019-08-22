@@ -1,4 +1,4 @@
-label {
+label:not(.form-check-label) {
     display: none;
 }
 

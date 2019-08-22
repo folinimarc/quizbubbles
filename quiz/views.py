@@ -11,7 +11,7 @@ from django.contrib import messages
 from django.contrib.auth.hashers import make_password, check_password
 import json
 import random
-from .decorators import session_authenticated, questionedit_authenticated
+from .decorators import *
 from .models import *
 from .forms import *
 from collections import OrderedDict
@@ -21,8 +21,6 @@ import time
 
 class Login(View):
     def get(self, request):
-        if (request.session.get('spaceid', False)):
-            return redirect('home')
         ctx = {}
         ctx['join_form'] = SpaceJoinForm()
         ctx['create_form'] = SpaceCreateForm()
@@ -37,10 +35,18 @@ class Login(View):
             join_form = SpaceJoinForm(request.POST)
             if join_form.is_valid():
                 space = Space.objects.filter(name=join_form.cleaned_data['name']).first()
-                if space and check_password(join_form.cleaned_data['password'], space.password):
-                    request.session['spaceid'] = str(space.uuid)
-                    return redirect('home')
-                join_form.add_error('password', 'Wrong spacename or password')
+                password = join_form.cleaned_data.get('password', None)
+                if not space:
+                    join_form.add_error('name', 'Spacename does not exist')
+                elif not space.public and not password:
+                    join_form.add_error('password', 'This space requires a password')
+                elif not space.public and not check_password(password, space.password):
+                    join_form.add_error('password', 'Invalid password')
+                else:
+                    if password:
+                        request.session[space.name] = str(space.uuid)
+                        request.session.set_expiry(0)
+                    return redirect('home', space_name=space.name)
             ctx['flipShowJoin'] = True
             ctx['join_form'] = join_form
             ctx['create_form'] = SpaceCreateForm()
@@ -54,54 +60,57 @@ class Login(View):
                 if Space.objects.filter(name=create_form.cleaned_data['name']).exists():
                     create_form.add_error('name', 'Name already in use')
                 else:
-                    # create quizspace
+                    # create quizespace
                     space = Space.objects.create(
                         name = create_form.cleaned_data['name'],
                         email = create_form.cleaned_data['email'],
-                        password = make_password(create_form.cleaned_data['password1'])
+                        password = make_password(create_form.cleaned_data['password1']),
+                        public = create_form.cleaned_data['public']
                     )
-                    messages.info(request, f'New quizspace \"{create_form.cleaned_data["name"]}\" successfully created. Click to hide me. Have fun!')
-                    request.session['spaceid'] = str(space.uuid)
-                    return redirect('home')
+                    messages.info(request, f'New quizespace \"{create_form.cleaned_data["name"]}\" successfully created. Have fun!')
+                    request.session[space.name] = str(space.uuid)
+                    request.session.set_expiry(0)
+                    return redirect('home', space_name=space.name)
             ctx['flipShowJoin'] = False
             ctx['join_form'] = SpaceJoinForm()
             ctx['create_form'] = create_form
             return render(request, 'quiz/login.html', ctx)
-
         return redirect('login')
 
 
 class Logout(View):
-    def get(self, request):
-        request.session.pop('spaceid', None)
-        request.session.pop('gameid', None)
-        request.session.pop('contributor', None)
+    def get(self, request, space_name):
+        request.session.pop(space_name, None)
+        request.session.pop('username', None)
         return redirect('login')
 
 
-@method_decorator([session_authenticated], name='dispatch')
+@method_decorator([check_space_permission], name='dispatch')
 class Home(View):
 
-    def get_sprint_question_pks(self, space):
-        all_questions = list(Question.objects.filter(space_id=space.id).values_list('pk', 'difficulty'))
+    def get_sprint_question_ids(self, space):
+        all_questions = list(Question.objects.filter(space_id=space.id).values_list('id', 'difficulty'))
         random.shuffle(all_questions)
         question_dict = {difficulty: [] for difficulty, _ in Question.DIFFICULTIES}
-        [question_dict[difficulty].append(pk) for pk, difficulty in all_questions]
+        [question_dict[difficulty].append(id) for id, difficulty in all_questions]
         question_list = []
         for difficulty, _ in Question.DIFFICULTIES:
             question_list.extend(question_dict[difficulty][:settings.SPRINT_NR_QUESTIONS_PER_DIFFICULTY])
         questions_total = len(question_list)
-        return questions_total, ','.join(str(pk) for pk in question_list)
+        return questions_total, ','.join(str(id) for id in question_list)
 
-    def get_marathon_question_pks(self, space):
-        question_list = list(Question.objects.filter(space_id=space.id).values_list('pk', flat=True))
+    def get_marathon_question_ids(self, space):
+        question_list = list(Question.objects.filter(space_id=space.id).values_list('id', flat=True))
         random.shuffle(question_list)
         questions_total = len(question_list)
-        return questions_total, ','.join(str(pk) for pk in question_list)
+        return questions_total, ','.join(str(id) for id in question_list)
 
-    def get(self, request):
+    def get(self, request, space_name):
         ctx = {}
-        space = Space.objects.get(uuid=request.session['spaceid'])
+        ctx['space_name'] = space_name
+        ctx['username'] = request.session.get('username', '')
+        space = Space.objects.get(name=space_name)
+        ctx['authenticated'] = request.session.get(space_name, None) == str(space.uuid)
         difficulty_counts = Question.objects.filter(space_id=space.id).values('difficulty').annotate(count=Count('difficulty'))
         difficulty_dict = OrderedDict()
         for db_val, verbose in sorted(Question.DIFFICULTIES, key=lambda x: x[0]):
@@ -122,18 +131,17 @@ class Home(View):
         nr_questions = Question.objects.filter(space_id=space.id).count()
         ctx['nr_sprint_questions'] = len(Question.DIFFICULTIES * settings.SPRINT_NR_QUESTIONS_PER_DIFFICULTY)
         ctx['nr_questions'] = nr_questions
-        ctx['sprint_champions'] = Game.objects\
-            .filter(space_id=space.id, active=False, gametype=Game.SPRINT)\
+        ctx['sprint_champions'] = Quiz.objects\
+            .filter(space_id=space.id, active=False, quiztype=Quiz.SPRINT)\
             .order_by('-questions_answered', 'duration')[:settings.NR_LEADERBOARD_ENTRIES_TO_SHOW]
-        ctx['marathon_champions'] = Game.objects\
-            .filter(space_id=space.id, active=False, gametype=Game.MARATHON)\
+        ctx['marathon_champions'] = Quiz.objects\
+            .filter(space_id=space.id, active=False, quiztype=Quiz.MARATHON)\
             .order_by('-questions_answered', 'duration')[:settings.NR_LEADERBOARD_ENTRIES_TO_SHOW]
-        ctx['nr_games'] = Game.objects.filter(space_id=space.id).count()
-        ctx['space_name'] = space.name
+        ctx['nr_quizes'] = Quiz.objects.filter(space_id=space.id).count()
         return render(request, 'quiz/home.html', ctx)
 
     @transaction.atomic
-    def post(self, request):
+    def post(self, request, space_name):
         payload = json.loads(request.body)
         action = payload.get('action', None)
         if action not in ['startSprint', 'startMarathon']:
@@ -141,177 +149,172 @@ class Home(View):
                 'status': 'ERROR', 
                 'message': 'No valid action was supplied. Please report this.'
                 })
-        form = GamePlayernameGametypeForm(payload)
+        form = QuizUsernamenameQuiztypeForm(payload)
         if not form.is_valid():
             return JsonResponse({
                 'status': 'ERROR', 
                 'message': form.get_form_errors_as_string()
                 })
-        # Only one game per session allowed.
-        old_gameid = request.session.get('gameid', None)
-        if old_gameid:
-            Game.objects.filter(uuid=old_gameid).update(active=False)
-        # Create new game
-        space = Space.objects.get(uuid=request.session['spaceid'])
-        if form.cleaned_data['gametype'] == Game.SPRINT:
-            questions_total, question_ids = self.get_sprint_question_pks(space)
-        elif form.cleaned_data['gametype'] == Game.MARATHON:
-            questions_total, question_ids = self.get_marathon_question_pks(space)
+        # Create new quiz
+        space = Space.objects.get(name=space_name)
+        if form.cleaned_data['quiztype'] == Quiz.SPRINT:
+            questions_total, question_ids = self.get_sprint_question_ids(space)
+        elif form.cleaned_data['quiztype'] == Quiz.MARATHON:
+            questions_total, question_ids = self.get_marathon_question_ids(space)
         else:
             return JsonResponse({
                 'status': 'ERROR', 
-                'message': f'Unknown gametype {form.cleaned_data["gametype"]}'
+                'message': f'Unknown quiztype {form.cleaned_data["quiztype"]}'
                 })
-        game = Game.objects.create(
+        quiz = Quiz.objects.create(
             **form.cleaned_data, 
             questions_total=questions_total,
             question_ids=question_ids,
             space_id=space.id
             )
-        request.session['gameid'] = str(game.uuid)
+        request.session[str(quiz.id)] = str(quiz.uuid)
+        request.session['username'] = form.cleaned_data['username']
         return JsonResponse({
                 'status': 'OK', 
                 'message': '',
-                'successRedirectUrl': reverse('quiz')
+                'successRedirectUrl': reverse('quiz',  kwargs={'space_name':space_name, 'quiz_id':quiz.id})
                 })
 
 
-@method_decorator([session_authenticated], name='dispatch')
+@method_decorator([check_space_permission], name='dispatch')
 class NewQuestion(View):
-    def get(self, request):
+    def get(self, request, space_name):
         ctx = {}
-        ctx['form'] = QuestionModelForm(initial={'contributor': request.session.get('contributor', None)})
+        ctx['space_name'] = space_name
+        ctx['form'] = QuestionModelForm(initial={'contributor': request.session.get('username', None)})
         return render(request, 'quiz/new_question.html', ctx)
 
     @transaction.atomic
-    def post(self, request):
+    def post(self, request, space_name):
         ctx = {}
-        space = Space.objects.get(uuid=request.session['spaceid'])
+        ctx['space_name'] = space_name
+        space = Space.objects.get(name=space_name)
         form = QuestionModelForm(request.POST)
         if form.is_valid():
             Question.objects.create(
                 **form.cleaned_data,
                 space_id=space.id
             )
-            request.session['contributor'] = form.cleaned_data['contributor']
+            request.session['username'] = form.cleaned_data['username']
             messages.info(request, 'Thank you! Your question was added.')
-            return redirect('new_question')
+            return redirect('new_question', space_name=space_name)
         else:
             messages.info(request, 'There were problems with your form. Please check the form field messages and submit again.')
         ctx['form'] = form
         return render(request, 'quiz/new_question.html', ctx)
 
 
-@method_decorator([session_authenticated], name='dispatch')
-class Quiz(View):
+@method_decorator([check_space_permission, check_quiz_permission], name='dispatch')
+class QuizView(View):
 
-    def get_current_game(self, game_id):
-        return get_object_or_404(Game, uuid=game_id)
+    def get_current_quiz(self, quiz_id):
+        return get_object_or_404(Quiz, id=quiz_id)
 
-    def get_current_question(self, game):
-        question_pk = int(game.question_ids.split(',')[game.questions_answered])
-        return get_object_or_404(Question, pk=question_pk)
+    def get_current_question(self, quiz):
+        question_id = int(quiz.question_ids.split(',')[quiz.questions_answered])
+        return get_object_or_404(Question, id=question_id)
 
-    def get_ranking(self, game):
-        outperform_questions = Game.objects.filter(space_id=game.space_id, active=False, gametype=game.gametype, questions_answered__gt=game.questions_answered).count()
-        outperform_time = Game.objects.filter(space_id=game.space_id, active=False, gametype=game.gametype, questions_answered=game.questions_answered, duration__lt=game.duration).count()
+    def get_ranking(self, quiz):
+        outperform_questions = Quiz.objects.filter(space_id=quiz.space_id, active=False, quiztype=quiz.quiztype, questions_answered__gt=quiz.questions_answered).count()
+        outperform_time = Quiz.objects.filter(space_id=quiz.space_id, active=False, quiztype=quiz.quiztype, questions_answered=quiz.questions_answered, duration__lt=quiz.duration).count()
         rank = outperform_questions + outperform_time + 1
         return rank
 
-    def get(self, request):
+    def get(self, request, space_name, quiz_id):
         ctx = {}
+        ctx['space_name'] = space_name
         return render(request, 'quiz/quiz.html', ctx)
 
     @transaction.atomic
-    def post(self, request):
+    def post(self, request, space_name, quiz_id):
         #time.sleep(0.5)
         payload = json.loads(request.body)
+        print(payload)
         action = payload.get('action', None)
-        game_id = request.session.get('gameid', None)
-        if not game_id:
-            return JsonResponse({
-                'status': 'ERROR', 
-                'message': 'No game was found that corresponds to this session. Please report this.'
-                })
-        if action not in ['getGameData', 'checkAnswer', 'nextQuestion', 'closeGame', 'jokerFiftyFifty', 'jokerAudience', 'jokerTimestop']:
+        if action not in ['getQuizData', 'checkAnswer', 'nextQuestion', 'closeQuiz', 'jokerFiftyFifty', 'jokerAudience', 'jokerTimestop']:
             return JsonResponse({
                 'status': 'ERROR', 
                 'message': 'No valid action was supplied. Please report this.'
                 })
-        game = self.get_current_game(game_id)
-        if not game.active:
+        quiz = self.get_current_quiz(quiz_id)
+        if not quiz.active:
             return JsonResponse({
                 'status': 'ERROR',
-                'message': f'This game is not active anymore. Please start a new game.'
+                'message': f'This quiz is not active anymore. Please start a new quiz.'
                 })
-        if action == 'getGameData':
-            game = self.get_current_game(game_id)
-            rank = self.get_ranking(game)
-            total_games = Game.objects.filter(space_id=game.space_id, active=False, gametype=game.gametype).count()
+        if action == 'getQuizData':
+            quiz = self.get_current_quiz(quiz_id)
+            rank = self.get_ranking(quiz)
+            quizes_total = Quiz.objects.filter(space_id=quiz.space_id, active=False, quiztype=quiz.quiztype).count() + 1
             return JsonResponse({
                 'status': 'OK',
-                'gametype': game.get_gametype_display(),
-                'timePassed': game.duration,
+                'quiztype': quiz.get_quiztype_display(),
+                'timePassed': quiz.duration,
                 'rank': rank,
-                'gamesTotal': total_games,
-                'questionsAnswered': game.questions_answered,
-                'questionsTotal': game.questions_total,
+                'quizesTotal': quizes_total,
+                'questionsAnswered': quiz.questions_answered,
+                'questionsTotal': quiz.questions_total,
                 })
         if action == 'jokerAudience':
-            game = self.get_current_game(game_id)
-            if not game.joker_audience_available:
+            quiz = self.get_current_quiz(quiz_id)
+            if not quiz.joker_audience_available:
                 return JsonResponse({
                     'status': 'ERROR',
                     'message': 'Audience joker is not available anymore.',
                     })
-            game.joker_audience_available = False
-            game.save()
-            question = self.get_current_question(game)
+            quiz.joker_audience_available = False
+            quiz.save()
+            question = self.get_current_question(quiz)
             chosen_answers_count = json.loads(question.chosen_answers_count)
             return JsonResponse({
                     'status': 'OK', 
                     'chosen_answers_count': chosen_answers_count
                     })
         if action == 'jokerFiftyFifty':
-            game = self.get_current_game(game_id)
-            if not game.joker_fiftyfifty_available:
+            quiz = self.get_current_quiz(quiz_id)
+            if not quiz.joker_fiftyfifty_available:
                 return JsonResponse({
                     'status': 'ERROR',
                     'message': 'Fifty-fifty joker is not available anymore.',
                     })
-            game.joker_fiftyfifty_available = False
-            game.save()
-            question = self.get_current_question(game)
+            quiz.joker_fiftyfifty_available = False
+            quiz.save()
+            question = self.get_current_question(quiz)
             kill = random.sample({'a','b','c','d'}.difference({question.correct_answer}), 2)
             return JsonResponse({
                     'status': 'OK', 
                     'kill': kill
                     })
         if action == 'jokerTimestop':
-            game = self.get_current_game(game_id)
-            if not game.joker_timestop_available:
+            quiz = self.get_current_quiz(quiz_id)
+            if not quiz.joker_timestop_available:
                 return JsonResponse({
                     'status': 'ERROR',
                     'message': 'Timestop joker is not available anymore.',
                     })
-            game.joker_timestop_available = False
-            game.timestop_active = True
-            game.save()
+            quiz.joker_timestop_available = False
+            quiz.timestop_active = True
+            quiz.save()
             return JsonResponse({
                     'status': 'OK', 
-                    'timePassed': game.duration
+                    'timePassed': quiz.duration
                     })
 
         if action == 'nextQuestion':
-            game = self.get_current_game(game_id)
-            game.helperdatetime = timezone.now()
-            game.intermezzo_state = False
-            game.save()
-            question = self.get_current_question(game)
+            quiz = self.get_current_quiz(quiz_id)
+            quiz.helperdatetime = timezone.now()
+            quiz.intermezzo_state = False
+            quiz.save()
+            question = self.get_current_question(quiz)
             return JsonResponse({
                 'status': 'OK',
                 'question': {
-                    'header': f'Question {game.questions_answered + 1} ({question.get_difficulty_display()})',
+                    'header': f'Question {quiz.questions_answered + 1} ({question.get_difficulty_display()})',
                     'body': question.question,
                 },
                 'answers': {
@@ -328,13 +331,13 @@ class Quiz(View):
                         'status': 'ERROR', 
                         'message': 'No answer supplied in request. Please report this.'
                         })
-            game = self.get_current_game(game_id)
-            if not game.timestop_active:
-                game.timestop_active = False
-                timedelta = timezone.now() - game.helperdatetime
-                game.duration += timedelta.seconds
-            game.intermezzo_state = True
-            question = self.get_current_question(game)
+            quiz = self.get_current_quiz(quiz_id)
+            if not quiz.timestop_active:
+                quiz.timestop_active = False
+                timedelta = timezone.now() - quiz.helperdatetime
+                quiz.duration += timedelta.seconds
+            quiz.intermezzo_state = True
+            question = self.get_current_question(quiz)
             # update answer count
             chosen_answers_count = json.loads(question.chosen_answers_count)
             chosen_answers_count[answer] += 1
@@ -342,65 +345,68 @@ class Quiz(View):
             question.save()
             # check answer
             if answer == question.correct_answer:
-                game.questions_answered += 1
-                if game.questions_answered == game.questions_total:
-                    game.active = False
-                    game.enddatetime = timezone.now()
+                quiz.questions_answered += 1
+                if quiz.questions_answered == quiz.questions_total:
+                    quiz.active = False
+                    quiz.enddatetime = timezone.now()
             else:
-                game.active = False
-                game.enddatetime = timezone.now()
-            game.save()
-            rank = self.get_ranking(game)
+                quiz.active = False
+                quiz.enddatetime = timezone.now()
+            quiz.save()
+            rank = self.get_ranking(quiz)
             return JsonResponse({
                 'status': 'OK',
-                'timePassed': game.duration,
+                'timePassed': quiz.duration,
                 'correctAnswer': question.correct_answer,
                 'rank': rank,
-                'gameActive': game.active,
-                'questionsAnswered': game.questions_answered,
+                'quizActive': quiz.active,
+                'questionsAnswered': quiz.questions_answered,
                 'questionExplanation': question.explanation
                 })
-        if action == 'closeGame':
-            game = self.get_current_game(game_id)
-            if not game.intermezzo_state:
-                game.enddatetime = timezone.now()
-                game.active = False
-                game.save()
+        if action == 'closeQuiz':
+            quiz = self.get_current_quiz(quiz_id)
+            if not quiz.intermezzo_state:
+                quiz.enddatetime = timezone.now()
+                quiz.active = False
+                quiz.save()
             return JsonResponse({
                 'status': 'OK'
             })
         return JsonResponse({'status': 'ERROR', 'message': 'You reached a deep dark point where you should not be... There are dragons! Please report this.'})
 
 
-@method_decorator([session_authenticated], name='dispatch')
+@method_decorator([check_space_permission], name='dispatch')
 class QuestionList(View):
     
-    def get(self, request):
+    def get(self, request, space_name):
         ctx = {}
-        space = Space.objects.filter(uuid=request.session.get('spaceid', None)).first()
+        ctx['space_name'] = space_name
+        space = Space.objects.get(name=space_name)
         questions = Question.objects.filter(space_id=space.id).order_by('id')
         ctx['questions'] = questions
         return render(request, 'quiz/question_list.html', ctx)
 
 
-@method_decorator([questionedit_authenticated], name='dispatch')
+@method_decorator([check_space_permission, check_question_permission], name='dispatch')
 class EditQuestion(View):
 
-    def get(self, request, question_id):
+    def get(self, request, space_name, question_id):
         ctx = {}
+        ctx['space_name'] = space_name
         question = Question.objects.get(id=question_id)
         form = QuestionModelForm(instance=question)
         ctx['form'] = form
         return render(request, 'quiz/edit_question.html', ctx)
 
     @transaction.atomic
-    def post(self, request, question_id):
+    def post(self, request, space_name, question_id):
         ctx = {}
+        ctx['space_name'] = space_name
         question = Question.objects.get(id=question_id)
         if 'delete' in request.POST:
             question.delete()
             messages.info(request, f'Question {question_id} successfully deleted!')
-            return redirect('question_list')
+            return redirect('question_list', space_name=space_name)
         form = QuestionModelForm(request.POST, instance=question)
         if not form.is_valid():
             messages.info(request, 'There were problems with your form. Please check the form field messages and submit again.')
@@ -408,6 +414,6 @@ class EditQuestion(View):
             return render(request, 'quiz/edit_question.html', ctx)
         form.save()
         messages.info(request, f'Question {question_id} successfully edited!')
-        return redirect('question_list')
+        return redirect('question_list', space_name=space_name)
 
         

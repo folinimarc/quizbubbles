@@ -23,7 +23,6 @@ MODIFIED FROM https://codepen.io/edeesims/pen/iGDzk
 
 .front, .back {
     position: absolute;
-    height: 100%;
     width: 100%;
     backface-visibility: hidden !important;
 }

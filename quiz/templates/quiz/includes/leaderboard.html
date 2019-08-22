@@ -15,7 +15,7 @@
                 {% for leader in leaders %}
                 <tr>
                     <th scope="row">{{forloop.counter}}</th>
-                    <td>{{leader.player}}</td>
+                    <td>{{leader.username}}</td>
                     <td>{{leader.questions_answered}}</td>
                     <td>{{leader.duration|humanize_timedelta}}</td>
                     <td>{{leader.enddatetime|date:"d.m.y"}}</td>
