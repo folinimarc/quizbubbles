@@ -29,14 +29,11 @@
 <!-- header -->
 <div class="row my-4 text-light">
     <div class="col-md-6 d-flex justify-content-start align-items-center">
-        <h2>{{bubble_name}} 
-            {% if not authenticated %}
-            (guest)
-            {% else %}
-            <a href="{% url 'settings' bubble_name=bubble_name %}" class="btn-mini btn btn-outline-light">Settings</a>
-            {% endif %} 
-            <a href="{% url 'logout' bubble_name=bubble_name %}" class="btn-mini btn btn-outline-light">Leave</a>
-        </h2>
+        <h2>{{bubble_name}} {% if not authenticated %} (guest){% endif %}</h2>
+        <a href="{% url 'logout' bubble_name=bubble_name %}" class="ml-2 btn-mini btn btn-outline-light">Leave</a>
+        {% if authenticated %}
+        <a href="{% url 'settings' bubble_name=bubble_name %}" class="ml-2 btn-mini btn btn-outline-light">Settings</a>
+        {% endif %}
     </div>
     <div class="col-md-6 d-flex flex-column justify-content-center align-items-end">
         <span>{{nr_questions}} questions</span>

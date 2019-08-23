@@ -3,18 +3,18 @@ from django.contrib import messages
 from .models import *
 
 
-def check_bubble_permission(function=None):
-    def wrapper(request, *args, **kwargs):
-        bubble_name = kwargs.get('bubble_name', None)
-        bubble = get_object_or_404(Bubble, name=bubble_name)
-        authenticated = request.session.get(bubble_name, None) == str(bubble.uuid)
-        if bubble.public or authenticated:
-            return function(request, *args, **kwargs)
-        return redirect('login')
-    return wrapper
-    if function:
-        return session_authenticated(function)
-    return session_authenticated
+def check_bubble_permission(authenticated_only=False):
+    def outer(function=None):
+        def wrapper(request, *args, **kwargs):
+            bubble_name = kwargs.get('bubble_name', None)
+            bubble = get_object_or_404(Bubble, name=bubble_name)
+            authenticated = request.session.get(bubble_name, None) == str(bubble.uuid)
+            if (not authenticated_only and bubble.public) or authenticated:
+                return function(request, *args, **kwargs)
+            messages.info(request, f'You tried to access a ressource without the necessary permissions. Please log in!')
+            return redirect('login')
+        return wrapper
+    return outer
 
 
 def check_question_permission(function=None):
@@ -26,11 +26,9 @@ def check_question_permission(function=None):
         question = get_object_or_404(Question, id=question_id)
         if authenticated and question.bubble_id == bubble.id:
             return function(request, *args, **kwargs)
+        messages.info(request, f'You tried to access a ressource without the necessary permissions. Please log in!')
         return redirect('login')
     return wrapper
-    if function:
-        return session_authenticated(function)
-    return session_authenticated
 
 
 def check_quiz_permission(function=None):
@@ -42,8 +40,6 @@ def check_quiz_permission(function=None):
         authenticated = request.session.get(str(quiz_id), None) == str(quiz.uuid)
         if authenticated and quiz.bubble_id == bubble.id:
             return function(request, *args, **kwargs)
-        return redirect('home', bubble_name=bubble_name)
+        messages.info(request, f'You tried to access a ressource without the necessary permissions. Please log in!')
+        return redirect('login')
     return wrapper
-    if function:
-        return session_authenticated(function)
-    return session_authenticated

@@ -23,3 +23,7 @@
 .answer:hover .answer-letter {
     font-size: 48px;
 }
+
+#heart {
+    font-size: 36px;
+}

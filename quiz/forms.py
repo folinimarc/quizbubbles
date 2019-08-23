@@ -66,7 +66,7 @@ class BubbleCreateForm(forms.ModelForm):
             'email': forms.TextInput(attrs={'placeholder': 'Email (public)'}),
             }
         labels = {
-            'public': 'Public Quizbubble'
+            'public': 'Public QuizBubble'
         }
 
     def clean(self):

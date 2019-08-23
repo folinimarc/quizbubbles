@@ -25,28 +25,28 @@
 <!-- settings-->
 <form class="hide-labels smaller-controls" method="post">
 {% csrf_token %}
-<div class="row">
+<div class="nav-row row">
     <div class="col-md-6 mb-3">
         <!-- settings -->
-        <div class="p-4 text-light bordered bg-primary d-flex justify-content-center align-items-center">
+        <div class="p-4 text-light d-flex justify-content-center align-items-center">
             <div>
-                <h5 class="mb-4 text-light text-center border-bottom border-light">Edit bubble</h5>
+                <h5 class="mb-4 text-light text-center border-bottom border-light">Edit</h5>
                 {{ change_form.name|as_crispy_field }}
                 {{ change_form.email|as_crispy_field }}
                 {{ change_form.public|as_crispy_field }}
                 {{ change_form.password1|as_crispy_field }}
                 {{ change_form.password2|as_crispy_field }}
-                <button type="submit" name="change" class="btn btn-success btn-block">Save changes</button>
+                <button type="submit" name="change" class="btn btn-outline-primary btn-block">Save changes</button>
             </div>
         </div>
     </div>
     <div class="col-md-6 mb-3">
         <!-- delete -->
-        <div class="p-4 text-light bordered bg-danger d-flex justify-content-center align-items-center">
+        <div class="p-4 text-light d-flex justify-content-center align-items-center">
             <div>
-                <h5 class="mb-3 text-light text-center border-bottom border-light">Danger zone!</h5>
+                <h5 class="mb-3 text-light text-center border-bottom border-light">Delete</h5>
                 {{ delete_form.delete_confirm|as_crispy_field }}
-                <button type="submit" name="delete" class="btn btn-outline-light btn-block">Delete bubble</button>
+                <button type="submit" name="delete" class="btn btn-outline-danger btn-block">Delete bubble</button>
             </div>
         </div>
     </div>
