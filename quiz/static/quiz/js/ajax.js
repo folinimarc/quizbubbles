@@ -14,9 +14,9 @@ function ajax_submit(dataObj, errorElId, url='') {
             } else {
                 let errorEl = document.getElementById(errorElId);
                 errorEl.textContent = response.message;
-                errorEl.style.opacity = 1;
+                errorEl.classList.remove('opacity-zero');
                 setTimeout(function() {
-                    errorEl.style.opacity = 0;
+                    errorEl.classList.add('opacity-zero');
                 }, 2000);
             }
         }

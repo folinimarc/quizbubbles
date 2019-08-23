@@ -36,51 +36,51 @@ class QuizUsernamenameQuiztypeForm(FormErrorsMixin, forms.ModelForm):
         fields = ('username', 'quiztype')
 
 
-class SpaceJoinForm(forms.ModelForm):
+class BubbleJoinForm(forms.ModelForm):
 
     prefix = 'join'
     class Meta:
-        model = Space
+        model = Bubble
         fields = ('name', 'password')
         widgets = {
-            'name': forms.TextInput(attrs={'placeholder': 'Spacename', 'autofocus': 'autofocus'}),
+            'name': forms.TextInput(attrs={'placeholder': 'Bubblename', 'autofocus': 'autofocus'}),
             'password': forms.PasswordInput(attrs={'placeholder': 'Password'}),
             }
 
     def __init__(self, *args, **kwargs):
-        super(SpaceJoinForm, self).__init__(*args, **kwargs)
+        super(BubbleJoinForm, self).__init__(*args, **kwargs)
         self.fields['password'].required = False
 
 
-class SpaceCreateForm(forms.ModelForm):
+class BubbleCreateForm(forms.ModelForm):
     
     password1 = forms.CharField(max_length=20, widget=forms.PasswordInput(attrs={'placeholder': 'Password'}))
     password2 = forms.CharField(max_length=20, widget=forms.PasswordInput(attrs={'placeholder': 'Repeat password'}))
 
     prefix='create'
     class Meta:
-        model = Space
+        model = Bubble
         fields = ('name', 'email', 'password1', 'password2', 'public')
         widgets = {
-            'name': forms.TextInput(attrs={'placeholder': 'Spacename'}),
+            'name': forms.TextInput(attrs={'placeholder': 'Bubblename'}),
             'email': forms.TextInput(attrs={'placeholder': 'Email (public)'}),
             }
         labels = {
-            'public': 'Public Quizspace'
+            'public': 'Public Quizbubble'
         }
 
     def clean(self):
-        cleaned_data = super(SpaceCreateForm, self).clean()
+        cleaned_data = super(BubbleCreateForm, self).clean()
         password1 = cleaned_data.get('password1')
         password2 = cleaned_data.get('password2')
         if password1 != password2:
             self.add_error('password2', 'Passwords did not match.')
-        space = Space.objects.filter(name=cleaned_data['name'])
-        if space and space[0].uuid != self.instance.uuid:
+        bubble = Bubble.objects.filter(name=cleaned_data.get('name', None))
+        if bubble and bubble[0].uuid != self.instance.uuid:
             self.add_error('name', 'Name already in use')
 
 
-class SpaceChangeForm(SpaceCreateForm):
+class BubbleChangeForm(BubbleCreateForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -90,11 +90,23 @@ class SpaceChangeForm(SpaceCreateForm):
     password2 = forms.CharField(max_length=20, help_text='Leave both blank to keep old password.', widget=forms.PasswordInput(attrs={'placeholder': 'Repeat Password'}))
 
 
-class SpaceDeleteForm(forms.Form):
+class BubbleDeleteForm(forms.Form):
 
     delete_confirm = forms.CharField(required=False, help_text='Type "DELETE" to confirm.')
     
     def clean(self):
-        cleaned_data = super(SpaceDeleteForm, self).clean()
+        cleaned_data = super(BubbleDeleteForm, self).clean()
         if cleaned_data['delete_confirm'] != 'DELETE':
             self.add_error('delete_confirm', 'Type DELETE to confirm.')
+
+
+class BubblePasswordResetForm(forms.Form):
+    password1 = forms.CharField(max_length=20, widget=forms.PasswordInput(attrs={'placeholder': 'Password'}))
+    password2 = forms.CharField(max_length=20, widget=forms.PasswordInput(attrs={'placeholder': 'Repeat password'}))
+
+    def clean(self):
+        cleaned_data = super(BubblePasswordResetForm, self).clean()
+        password1 = cleaned_data.get('password1')
+        password2 = cleaned_data.get('password2')
+        if password1 != password2:
+            self.add_error('password2', 'Passwords did not match.')

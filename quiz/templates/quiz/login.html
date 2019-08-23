@@ -18,7 +18,7 @@
 <script src="{% static 'quiz/js/messages.js' %}"></script>
 <script src="{% static 'quiz/js/ajax.js' %}"></script>
 <script src="{% static 'quiz/js/login.js' %}"></script>
-<script src="{% static 'quiz/js/public_spaces_list.js' %}"></script>
+<script src="{% static 'quiz/js/public_bubbles_list.js' %}"></script>
 {% endblock %}
 
 
@@ -33,7 +33,7 @@
     <div class="row mt-5">
         <!-- join / create -->
         <div class="col-12">
-            <h2 class="text-white text-center border-bottom border-light mb-3">Welcome to QuizSpace</h2>
+            <h2 class="text-white text-center border-bottom border-light mb-3">Welcome to QuizBubble</h2>
             <!-- flipcard -->
             <div id="flipcard" class="{% if not flipShowJoin %}flipped{% endif %} flip-card">
                 <div class="content">
@@ -49,6 +49,9 @@
                                 <div class="p-1 w-50">
                                     <button type="submit" name="join" class="btn btn-success btn-block">Join</button>
                                 </div>
+                                {% if wrong_password %}
+                                <a href="{% url 'forgot_password' bubble_name=bubble_name %}" class="text-light mt-2 p-1"><small>Forgot password?</small></a>
+                                {% endif %}
                             </div>
                         </form>
                     </div>
@@ -74,8 +77,8 @@
     <div class="row my-5">
         <!-- public quizes list -->
         <div class="col-12">
-            <h2 class="text-white text-center border-bottom border-light mb-3">Join a public quiz</h2>
-            {% include 'quiz/includes/public_spaces_list.html' %}
+            <h2 class="text-white text-center border-bottom border-light mb-3">Join a public bubble</h2>
+            {% include 'quiz/includes/public_bubbles_list.html' %}
         </div>
     </div>
 </section>

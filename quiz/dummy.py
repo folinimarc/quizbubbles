@@ -10,24 +10,24 @@ def randStr(maxi, slug=False):
         return ''.join(random.choices(letter_set, k=random.randint(10, maxi)))
 
 def setup():
-    nr_spaces = 60
+    nr_bubbles = 60
     questions_per_difficulty = 20
 
     print('start')
 
-    #create spaces
-    for k in range(nr_spaces):
-        print(f'Create space {k}')
-        Space.objects.create(
+    #create bubbles
+    for k in range(nr_bubbles):
+        print(f'Create bubble {k}')
+        Bubble.objects.create(
             name=randStr(20, slug=True),
             password=make_password('pw'),
             email='test@test.com',
             public=True if random.random() < 0.5 else False
         )
 
-    spaces = Space.objects.all()
-    for k, space in enumerate(spaces):
-        print(f'---- {space.name} ({k+1}/{len(spaces)}) -----')
+    bubbles = Bubble.objects.all()
+    for k, bubble in enumerate(bubbles):
+        print(f'---- {bubble.name} ({k+1}/{len(bubbles)}) -----')
         for difficulty in Question.DIFFICULTIES:
             print(f'---- {difficulty[0]} -----')
             for k in range(questions_per_difficulty):
@@ -41,7 +41,7 @@ def setup():
                     difficulty=difficulty[0],
                     explanation=randStr(400),
                     contributor='fom',
-                    space_id=space.id
+                    bubble_id=bubble.id
                 )
 
     print('finished')

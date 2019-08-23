@@ -29,7 +29,7 @@
         <div class="row text-light my-3 justify-content-between">
             <div class="col-md-2 text-center d-flex align-items-center justify-content-center">
                 <h5 class="m-0">[[quiztype]]</h5>
-                <a href="{% url 'home' space_name=space_name %}" class="ml-2 btn btn-mini btn-outline-light">Leave</a>
+                <a href="{% url 'home' bubble_name=bubble_name %}" class="ml-2 btn btn-mini btn-outline-light">Leave</a>
             </div>
             <div class="col-md-1 text-center d-flex align-items-center justify-content-center p-2">
                 <span :class="{'opacity-zero': !loading}" class="opacity-fade spinner-border"></span>
@@ -64,7 +64,7 @@
                                     <i class="material-icons d-block">mood_bad</i>
                                     <h3 class="my-2">Oh no, something went wrong!</h3>
                                 </div>
-                                <a @click.stop="" href="{% url 'home' space_name=space_name %}" class="btn btn-success d-inline-block">Back home</a>
+                                <a @click.stop="" href="{% url 'home' bubble_name=bubble_name %}" class="btn btn-success d-inline-block">Back home</a>
                             </div>
                             <div v-if="quizStarted && !errorOccured">
                                 <!-- display SUCCESS -->
@@ -77,13 +77,13 @@
                                         </template>
                                         <template v-else>
                                             <h3 class="mb-0 mr-4">You did it!</h3>
-                                            <a @click.stop="" href="{% url 'home' space_name=space_name %}" class="btn btn-primary">Back home</a>
+                                            <a @click.stop="" href="{% url 'home' bubble_name=bubble_name %}" class="btn btn-primary">Back home</a>
                                         </template>
                                     </template>
                                     <template v-else>
                                         <i class="material-icons">sentiment_very_dissatisfied</i>
                                         <h3 class="mb-0 mr-4">Quiz over!</h3>
-                                        <a @click.stop="" href="{% url 'home' space_name=space_name %}" class="btn btn-primary">Back home</a>
+                                        <a @click.stop="" href="{% url 'home' bubble_name=bubble_name %}" class="btn btn-primary">Back home</a>
                                     </template>
                                 </div>
                                 <p v-if="questionsAnswered==1 && quizActive"><b>Hint:</b> Click here to view question again.</p>

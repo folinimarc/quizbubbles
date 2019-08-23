@@ -20,6 +20,10 @@ button > i.material-icons {
     border-color: white;
 }
 
+.nav-row .btn {
+    box-shadow: none !important;
+}
+
 .opacity-fade {
     transition: opacity 750ms;
 }
@@ -59,8 +63,9 @@ a {
 }
 
 .error-message {
-    opacity: 0;
+    color: yellow;
     transition: opacity 0.5s;
+    font-size: 0.8em;
 }
 
 .opacity-zero {
@@ -126,5 +131,6 @@ a {
 }
 
 .invalid-feedback {
+    font-weight: lighter !important;
     color: yellow;
 }

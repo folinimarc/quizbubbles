@@ -7,9 +7,9 @@ class QuestionAdmin(admin.ModelAdmin):
     formfield_overrides = {
         models.TextField: {'widget': widgets.Textarea(attrs={'rows':4, 'cols': 40})},
     }
-    list_select_related = ('space',)
-    list_display = ('pk', 'trimmed_question', 'difficulty', 'contributor', 'space')
-    search_fields = ('pk', 'trimmed_question', 'difficulty', 'contributor', 'space')
+    list_select_related = ('bubble',)
+    list_display = ('pk', 'trimmed_question', 'difficulty', 'contributor', 'bubble')
+    search_fields = ('pk', 'trimmed_question', 'difficulty', 'contributor', 'bubble')
 
     fieldsets = (
         ('Define question and answers', {
@@ -30,12 +30,12 @@ class QuestionAdmin(admin.ModelAdmin):
 @admin.register(Quiz)
 class QuizAdmin(admin.ModelAdmin):
     readonly_fields = ('uuid',)
-    list_select_related = ('space',)
-    list_display = ('id', 'username', 'quiztype', 'questions_total', 'active', 'duration', 'enddatetime', 'last_access','space')
-    search_fields = ('username', 'quiztype', 'questions_total', 'active', 'duration', 'enddatetime', 'last_access', 'space')
+    list_select_related = ('bubble',)
+    list_display = ('id', 'username', 'quiztype', 'questions_total', 'active', 'duration', 'enddatetime', 'last_access','bubble')
+    search_fields = ('username', 'quiztype', 'questions_total', 'active', 'duration', 'enddatetime', 'last_access', 'bubble')
 
 
-@admin.register(Space)
-class SpaceAdmin(admin.ModelAdmin):
+@admin.register(Bubble)
+class BubbleAdmin(admin.ModelAdmin):
     list_display = ('name', 'email', 'created', 'last_access')
     readonly_fields = ('uuid', 'password')

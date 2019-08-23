@@ -49,7 +49,7 @@
                 <tbody>
                     {% for question in questions %}
                     <tr>
-                        <th scope="col"><a class="text-white border-bottom border-light" href="{% url 'edit_question' space_name=space_name question_id=question.id %}"><i class="material-icons">edit</i> {{question.id}}</a></td>
+                        <th scope="col"><a class="text-white border-bottom border-light" href="{% url 'edit_question' bubble_name=bubble_name question_id=question.id %}"><i class="material-icons">edit</i> {{question.id}}</a></td>
                         <td>{{question.question}}</td>
                         <td>{{question.get_difficulty_display}}</td>
                         <td>{{question.contributor}}</td>

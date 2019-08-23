@@ -17,17 +17,20 @@
 <!-- messages -->
 {% include 'quiz/includes/messages.html' %}
 <!-- nav -->
-{% include 'quiz/includes/nav_settings.html' %}
-
+<div class="nav-row row my-4">
+    <div class="col-12">
+        <a class="btn btn-outline-secondary px-4 py-2" href="{% url 'home' bubble_name=bubble_name %}">Go back</a>
+    </div>
+</div>
+<!-- settings-->
 <form class="hide-labels smaller-controls" method="post">
 {% csrf_token %}
-<!-- settings-->
 <div class="row">
     <div class="col-md-6 mb-3">
         <!-- settings -->
         <div class="p-4 text-light bordered bg-primary d-flex justify-content-center align-items-center">
             <div>
-                <h5 class="mb-4 text-light text-center border-bottom border-light">Edit space</h5>
+                <h5 class="mb-4 text-light text-center border-bottom border-light">Edit bubble</h5>
                 {{ change_form.name|as_crispy_field }}
                 {{ change_form.email|as_crispy_field }}
                 {{ change_form.public|as_crispy_field }}
@@ -43,7 +46,7 @@
             <div>
                 <h5 class="mb-3 text-light text-center border-bottom border-light">Danger zone!</h5>
                 {{ delete_form.delete_confirm|as_crispy_field }}
-                <button type="submit" name="delete" class="btn btn-outline-light btn-block">Delete space</button>
+                <button type="submit" name="delete" class="btn btn-outline-light btn-block">Delete bubble</button>
             </div>
         </div>
     </div>

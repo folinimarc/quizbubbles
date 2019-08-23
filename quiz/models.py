@@ -36,7 +36,7 @@ class Question(models.Model):
     difficulty = models.IntegerField(choices=DIFFICULTIES)
     explanation = models.TextField(help_text='Provide some more context about the right answer and maybe frame it in the larger picture of the other answers. This explanation will be displayed after an answer was picked, irrepective of whether the right or wrong answer was chosen.')
     contributor = models.CharField(max_length=255)
-    space = models.ForeignKey('Space', on_delete=models.CASCADE, related_name='questions')
+    bubble = models.ForeignKey('Bubble', on_delete=models.CASCADE, related_name='questions')
     created = models.DateTimeField(auto_now_add=True)
 
     @staticmethod
@@ -74,7 +74,7 @@ class Quiz(models.Model):
     helperdatetime = models.DateTimeField(null=True, blank=True)
     duration = models.IntegerField(default=0)
     intermezzo_state = models.BooleanField(default=True)
-    space = models.ForeignKey('Space', on_delete=models.CASCADE, related_name='quizes')
+    bubble = models.ForeignKey('Bubble', on_delete=models.CASCADE, related_name='quizes')
     joker_fiftyfifty_available = models.BooleanField(default=True)
     joker_audience_available = models.BooleanField(default=True)
     joker_timestop_available = models.BooleanField(default=True)
@@ -83,7 +83,7 @@ class Quiz(models.Model):
     def __str__(self):
         return f'Quiz {self.id}'
 
-class Space(models.Model):
+class Bubble(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4)
     name = models.SlugField(max_length=20)
     email = models.EmailField()
@@ -91,6 +91,7 @@ class Space(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     last_access = models.DateTimeField(auto_now=True)
     public = models.BooleanField(default=False)
+    reset_token = models.TextField(null=True, blank=True)
 
     def __str__(self):
         return self.name

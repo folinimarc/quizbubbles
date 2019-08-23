@@ -29,13 +29,13 @@
 <!-- header -->
 <div class="row my-4 text-light">
     <div class="col-md-6 d-flex justify-content-start align-items-center">
-        <h2>{{space_name}} 
+        <h2>{{bubble_name}} 
             {% if not authenticated %}
             (guest)
             {% else %}
-            <a href="{% url 'settings' space_name=space_name %}" class="btn-mini btn btn-outline-light">Settings</a>
+            <a href="{% url 'settings' bubble_name=bubble_name %}" class="btn-mini btn btn-outline-light">Settings</a>
             {% endif %} 
-            <a href="{% url 'logout' space_name=space_name %}" class="btn-mini btn btn-outline-light">Leave</a>
+            <a href="{% url 'logout' bubble_name=bubble_name %}" class="btn-mini btn btn-outline-light">Leave</a>
         </h2>
     </div>
     <div class="col-md-6 d-flex flex-column justify-content-center align-items-end">
@@ -68,7 +68,7 @@
                                 </div>
                             </div>
                         </div>
-                        <small id="error-message-sprint" class="error-message text-white m-0" style="opacity:0;">Not a valid name.</small>
+                        <p id="error-message-sprint" class="error-message opacity-zero m-0">Not a valid name.</p>
                         {% endif %}
                     </div>
                 </div>
@@ -96,7 +96,7 @@
                                 </div>
                             </div>
                         </div>
-                        <small id="error-message-marathon" class="error-message text-white m-0" style="opacity:0;"></small>
+                        <p id="error-message-marathon" class="error-message opacity-zero m-0"></p>
                         {% endif %}
                     </div>
                 </div>
@@ -113,8 +113,8 @@
                 </div>
                 <div class="back h-100 bordered cursor-pointer bg-success text-light p-3 d-flex justify-content-center align-items-center">
                     <div class="nav-row">
-                        <a href="{% url 'new_question' space_name=space_name %}" class="btn btn-outline-primary btn-block mb-4">Add question</a>
-                        <a href="{% url 'question_list' space_name=space_name %}" class="btn btn-outline-primary btn-block">Edit question</a>
+                        <a href="{% url 'new_question' bubble_name=bubble_name %}" class="btn btn-outline-primary btn-block mb-4">Add question</a>
+                        <a href="{% url 'question_list' bubble_name=bubble_name %}" class="btn btn-outline-primary btn-block">Edit question</a>
                     </div>
                 </div>
             </div>

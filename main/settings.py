@@ -127,3 +127,7 @@ NR_LEADERBOARD_ENTRIES_TO_SHOW = 5
 
 # crispy forms template pack
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
+
+# EMAIL BACKEND
+EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
+EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'mail')
