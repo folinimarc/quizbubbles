@@ -116,7 +116,7 @@ class ForgotPassword(View):
         token = Signer().sign('-'.join([timestamp, bubble.name]))
         bubble.reset_token = token
         bubble.save()
-        formatted_time_now = timezone.now().strftime('%m/%d/%Y-%H:%M:%S')
+        formatted_time_now = timezone.now().strftime('%Y-%m-%d %H:%M:%S')
         subject = f'Password reset request of quizbubble {bubble.name} on {formatted_time_now}'
         reset_link = request.build_absolute_uri(reverse('password_reset', kwargs={'token': token}))
         reset_link_html = f'<html><body><a href="{reset_link}" target="_blank">{reset_link}</a></body></html>'
@@ -177,7 +177,7 @@ class PasswordReset(View):
         return redirect('login')
 
 
-@method_decorator([check_bubble_permission], name='dispatch')
+@method_decorator([check_bubble_permission(authenticated_only=True)], name='dispatch')
 class Settings(View):
     def get(self, request, bubble_name):
         ctx = {}
@@ -220,7 +220,7 @@ class Settings(View):
         return redirect('home', bubble_name=bubble_name)
 
 
-@method_decorator([check_bubble_permission], name='dispatch')
+@method_decorator([check_bubble_permission(authenticated_only=False)], name='dispatch')
 class Home(View):
 
     def get_sprint_question_ids(self, bubble):
@@ -318,7 +318,7 @@ class Home(View):
                 })
 
 
-@method_decorator([check_bubble_permission], name='dispatch')
+@method_decorator([check_bubble_permission(authenticated_only=True)], name='dispatch')
 class NewQuestion(View):
     def get(self, request, bubble_name):
         ctx = {}
@@ -346,7 +346,7 @@ class NewQuestion(View):
         return render(request, 'quiz/new_question.html', ctx)
 
 
-@method_decorator([check_bubble_permission, check_quiz_permission], name='dispatch')
+@method_decorator([check_bubble_permission(authenticated_only=False), check_quiz_permission], name='dispatch')
 class QuizView(View):
 
     def get_current_quiz(self, quiz_id):
@@ -512,7 +512,7 @@ class QuizView(View):
         return JsonResponse({'status': 'ERROR', 'message': 'You reached a deep dark point where you should not be... There are dragons! Please report this.'})
 
 
-@method_decorator([check_bubble_permission], name='dispatch')
+@method_decorator([check_bubble_permission(authenticated_only=True)], name='dispatch')
 class QuestionList(View):
     
     def get(self, request, bubble_name):
@@ -524,7 +524,7 @@ class QuestionList(View):
         return render(request, 'quiz/question_list.html', ctx)
 
 
-@method_decorator([check_bubble_permission, check_question_permission], name='dispatch')
+@method_decorator([check_bubble_permission(authenticated_only=True), check_question_permission], name='dispatch')
 class EditQuestion(View):
 
     def get(self, request, bubble_name, question_id):
