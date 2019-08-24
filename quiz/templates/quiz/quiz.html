@@ -50,7 +50,7 @@
         <div class="row">
             <div class="col-12">
                 <!-- flipcard question -->
-                <div @click="flipQuestion()" :class="{flipped: flipShowQuestion, 'cursor-pointer': !awaitingAnswer && quizStarted}" class="flip-card h-240px">
+                <div @click="flipQuestion()" :class="{flipped: flipShowQuestion, 'cursor-pointer': allowFlip}" class="flip-card h-240px">
                     <div class="content">
                         <!-- front question -->
                         <div class="front h-100 overflow-auto bordered noselect text-light p-4"
@@ -94,7 +94,7 @@
                                 <p v-if="questionsAnswered==5 && quizActive"><b>Hint:</b> The quiz ends immediately upon either closing the browser or even reloading the page while answering a question.</p>
                                 <div v-if="!quizActive" class="d-flex flex-column align-items-center">
                                     <h5 class="m-0 mt-2 mb-3">You rank [[rank]] out of [[quizesTotal]] total with [[questionsAnswered]] correct answers in [[formattedTime()]]!</h5>
-                                    <p class="m-0 mb-2 d-flex align-items-center">Liked this quiz? Feel free to share some love by clicking the heart <i class="ml-2 medium-icon material-icons">[[heartIcon]]</i></p>
+                                    <p v-if="showHeart" class="m-0 mb-2 d-flex align-items-center">Liked this quiz? Feel free to share some love by clicking the heart <i @click.prevent.stop="sendLove();" class="ml-2 medium-icon material-icons">[[heartIcon]]</i></p>
                                 </div>
                                 <h5 class="border-bottom border-light">Explanation</h5>
                                 <p>[[questionExplanation]]</p>

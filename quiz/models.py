@@ -78,7 +78,7 @@ class Quiz(models.Model):
     joker_audience_available = models.BooleanField(default=True)
     joker_timestop_available = models.BooleanField(default=True)
     timestop_active = models.BooleanField(default=False)
-    sent_love = models.BooleanField(default=False)
+    can_send_love = models.BooleanField(default=True)
 
     def __str__(self):
         return f'Quiz {self.id}'

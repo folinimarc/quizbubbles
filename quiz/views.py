@@ -370,9 +370,7 @@ class QuizView(View):
 
     @transaction.atomic
     def post(self, request, bubble_name, quiz_id):
-        #time.sleep(0.5)
         payload = json.loads(request.body)
-        print(payload)
         action = payload.get('action', None)
         if action not in ['getQuizData', 'checkAnswer', 'nextQuestion', 'closeQuiz', 'jokerFiftyFifty', 'jokerAudience', 'jokerTimestop']:
             return JsonResponse({
@@ -380,6 +378,20 @@ class QuizView(View):
                 'message': 'No valid action was supplied. Please report this.'
                 })
         quiz = self.get_current_quiz(quiz_id)
+        if action == 'sendLove':
+            if not quiz.can_send_love or quiz.questions_answered != quiz.questions_total:
+                return JsonResponse({
+                    'status': 'ERROR',
+                    'message': 'There was a problem with sending love :(',
+                    })
+            quiz.can_send_love = False
+            quiz.save()
+            bubble = get_object_or_404(Bubble, name=bubble_name)
+            bubble.hearts += 1
+            bubble.save()
+            return JsonResponse({
+                    'status': 'OK',
+            })
         if not quiz.active:
             return JsonResponse({
                 'status': 'ERROR',
@@ -503,6 +515,7 @@ class QuizView(View):
             quiz = self.get_current_quiz(quiz_id)
             quiz.enddatetime = timezone.now()
             quiz.active = False
+            quiz.can_send_love = False
             quiz.save()
             return JsonResponse({
                 'status': 'OK'

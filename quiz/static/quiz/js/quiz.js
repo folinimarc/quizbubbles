@@ -11,6 +11,7 @@ var app = new Vue({
     quizActive: true,
     awaitingAnswer: false,
     flipShowQuestion: false,
+    allowFlip: false,
     timePassed: 0,
     loading: true,
     quizesTotal: 0,
@@ -29,7 +30,7 @@ var app = new Vue({
     jokerAudienceAvailable: true,
     jokerTimestopAvailable: true,
     hiddenAnswers: ['a', 'b', 'c', 'd'],
-    sentLove: false
+    canSendLove: true
   },
   mounted() {
     /* AXIOS CSRF CONFIGURATION */
@@ -52,10 +53,18 @@ var app = new Vue({
       return this.chosenAnswer === this.correctAnswer;
     },
     heartIcon: function() {
-      return this.sentLove ? 'favorite' : 'favorite_outline';
+      return this.canSendLove ? 'favorite-border' : 'favorite';
+    },
+    showHeart: function() {
+      return this.answeredCorrectly && this.questionsAnswered===this.questionsTotal && this.quiztype==='Sprint';
     }
   },
   methods: {
+    sendLove() {
+      if (!this.canSendLove) return;
+      this.canSendLove = false;
+      this.ajaxPost({'action':'sendLove'}, function() {});
+    },
     jokerFiftyFifty: function() {
       if (!this.awaitingAnswer || !this.jokerFiftyFiftyAvailable) return;
       this.jokerFiftyFiftyAvailable = false;
@@ -87,6 +96,7 @@ var app = new Vue({
       this.question = Object.assign(this.question, data['question']);
       this.hiddenAnswers = ['a', 'b', 'c', 'd'];
       this.flipShowQuestion = true;
+      this.allowFlip = false;
       setTimeout(function() {
         this.answers = data['answers'];
         this.hiddenAnswers = [];
@@ -139,6 +149,7 @@ var app = new Vue({
       this.questionsAnswered = data['questionsAnswered'];
       this.questionExplanation = data['questionExplanation'];
       this.flipShowQuestion = false;
+      this.allowFlip = true;
     },
     getAnswerClass: function(answer) {
       if (this.correctAnswer == answer) {

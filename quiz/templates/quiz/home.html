@@ -30,10 +30,10 @@
 <div class="row my-4 text-light">
     <div class="col-md-6 d-flex justify-content-start align-items-center">
         <h2>{{bubble_name}} {% if not authenticated %} (guest){% endif %}</h2>
-        <a href="{% url 'logout' bubble_name=bubble_name %}" class="ml-2 btn-mini btn btn-outline-light">Leave</a>
         {% if authenticated %}
         <a href="{% url 'settings' bubble_name=bubble_name %}" class="ml-2 btn-mini btn btn-outline-light">Settings</a>
         {% endif %}
+        <a href="{% url 'logout' bubble_name=bubble_name %}" class="ml-2 btn-mini btn btn-outline-light">Leave</a>
     </div>
     <div class="col-md-6 d-flex flex-column justify-content-center align-items-end">
         <span>{{nr_questions}} questions</span>
@@ -107,7 +107,7 @@
         <div class="flip-card hoverable h-200px">
             <div class="content">
                 <div class="front h-100 bordered cursor-pointer bg-success text-light p-5 d-flex justify-content-center align-items-center">
-                    <div class="text-center"><i class="material-icons">add_circle_outline</i>Contribute</div>
+                    <div class="text-center"><i class="material-icons large-icon">add_circle_outline</i>Contribute</div>
                 </div>
                 <div class="back h-100 bordered cursor-pointer bg-success text-light p-3 d-flex justify-content-center align-items-center">
                     <div class="nav-row">
