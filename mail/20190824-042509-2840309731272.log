@@ -1,0 +1,15 @@
+Content-Type: text/plain; charset="utf-8"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Subject: Password reset request of quizbubble test on 2019-08-24 02:25:09
+From: info@quizbubble.com
+To: test@test.com
+Date: Sat, 24 Aug 2019 02:25:09 -0000
+Message-ID: <156661350922.3032.2412720901439179472@DESKTOP-ALAS2PD.winbox>
+
+The following link will be valid for one hour to reset your password of bubble test:
+
+<html><body><a href="http://localhost:8000/passwordreset/1566613508-test:3IzENCnvqoSYnRqGB-TjRtcEUDI" target="_blank">http://localhost:8000/passwordreset/1566613508-test:3IzENCnvqoSYnRqGB-TjRtcEUDI</a></body></html>
+
+Kind regards from the quizbubble team
+-------------------------------------------------------------------------------
