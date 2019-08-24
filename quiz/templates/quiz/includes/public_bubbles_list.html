@@ -4,6 +4,7 @@
             <th>Bubblename</th>
             <th>#Questions</th>
             <th>#Quizes played</th>
+            <th><i class="material-icons">favorite</i></th>
             <th>Created</th>
             <th>Last activity</th>
         </tr>
@@ -14,6 +15,7 @@
             <td><a class="text-white border-bottom border-light" href="{% url 'home' bubble_name=bubble.name %}">{{bubble.name}}</a></td>
             <td>{{bubble.questions_total}}</td>
             <td>{{bubble.quizes_total}}</td>
+            <td>{{bubble.hearts}}</td>
             <td>{{bubble.created|date:"d.m.y"}}</td>
             <td>{{bubble.last_access|date:"d.m.y"}}</td>
         </tr>

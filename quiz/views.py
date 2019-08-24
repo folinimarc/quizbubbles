@@ -27,8 +27,8 @@ class Login(View):
     def get_public_bubbles(self):
         return Bubble.objects\
             .filter(public=True)\
-            .annotate(questions_total=Count('questions'))\
-            .annotate(quizes_total=Count('quizes'))\
+            .annotate(questions_total=Count('questions', distinct=True))\
+            .annotate(quizes_total=Count('quizes', distinct=True))\
             .order_by('last_access', 'questions_total')
 
     def get(self, request):
@@ -268,6 +268,7 @@ class Home(View):
         nr_questions = Question.objects.filter(bubble_id=bubble.id).count()
         ctx['nr_sprint_questions'] = len(Question.DIFFICULTIES * settings.SPRINT_NR_QUESTIONS_PER_DIFFICULTY)
         ctx['nr_questions'] = nr_questions
+        ctx['nr_hearts'] = bubble.hearts
         ctx['sprint_champions'] = Quiz.objects\
             .filter(bubble_id=bubble.id, active=False, quiztype=Quiz.SPRINT)\
             .order_by('-questions_answered', 'duration')[:settings.NR_LEADERBOARD_ENTRIES_TO_SHOW]
@@ -445,7 +446,6 @@ class QuizView(View):
         if action == 'nextQuestion':
             quiz = self.get_current_quiz(quiz_id)
             quiz.helperdatetime = timezone.now()
-            quiz.intermezzo_state = False
             quiz.save()
             question = self.get_current_question(quiz)
             return JsonResponse({
@@ -473,7 +473,6 @@ class QuizView(View):
                 quiz.timestop_active = False
                 timedelta = timezone.now() - quiz.helperdatetime
                 quiz.duration += timedelta.seconds
-            quiz.intermezzo_state = True
             question = self.get_current_question(quiz)
             # update answer count
             chosen_answers_count = json.loads(question.chosen_answers_count)
@@ -502,10 +501,9 @@ class QuizView(View):
                 })
         if action == 'closeQuiz':
             quiz = self.get_current_quiz(quiz_id)
-            if not quiz.intermezzo_state:
-                quiz.enddatetime = timezone.now()
-                quiz.active = False
-                quiz.save()
+            quiz.enddatetime = timezone.now()
+            quiz.active = False
+            quiz.save()
             return JsonResponse({
                 'status': 'OK'
             })

@@ -60,30 +60,31 @@
                             </div>
                             <!-- display error -->
                             <div v-if="errorOccured" class="stretch-out d-flex align-items-center justify-content-center flex-column">
-                                <div class="d-flex align-items-center justify-content-center">
-                                    <i class="material-icons d-block">mood_bad</i>
+                                <div class="mb-3 d-flex align-items-center justify-content-center">
+                                    <i class="material-icons large-icon mr-2">mood_bad</i>
                                     <h3 class="my-2">Oh no, something went wrong!</h3>
                                 </div>
-                                <a @click.stop="" href="{% url 'home' bubble_name=bubble_name %}" class="btn btn-success d-inline-block">Back home</a>
+                                <a @click.stop="" href="{% url 'home' bubble_name=bubble_name %}" class="btn btn-outline-light d-inline-block white-outline">Leave</a>
                             </div>
                             <div v-if="quizStarted && !errorOccured">
                                 <!-- display SUCCESS -->
                                 <div class="d-flex justify-content-start align-items-center mb-3">
-                                    <template v-if="chosenAnswer===correctAnswer">
-                                        <i class="material-icons">sentiment_very_satisfied</i>
+                                    <template v-if="answeredCorrectly">
                                         <template v-if="quizActive">
+                                            <i class="material-icons large-icon mr-2">thumb_up</i>
                                             <h3 class="mb-0 mr-4">Correct!</h3>
-                                            <button @click.stop="nextQuestion();" class="btn btn-primary">Next question</button>
+                                            <button @click.stop="nextQuestion();" class="btn btn-outline-primary white-outline">Next question</button>
                                         </template>
                                         <template v-else>
+                                            <i class="material-icons large-icon mr-2">sentiment_very_satisfied</i>
                                             <h3 class="mb-0 mr-4">You did it!</h3>
-                                            <a @click.stop="" href="{% url 'home' bubble_name=bubble_name %}" class="btn btn-primary">Back home</a>
+                                            <a @click.stop="" href="{% url 'home' bubble_name=bubble_name %}" class="btn btn-outline-light white-outline">Leave</a>
                                         </template>
                                     </template>
                                     <template v-else>
-                                        <i class="material-icons">sentiment_very_dissatisfied</i>
-                                        <h3 class="mb-0 mr-4">Quiz over!</h3>
-                                        <a @click.stop="" href="{% url 'home' bubble_name=bubble_name %}" class="btn btn-primary">Back home</a>
+                                        <i class="material-icons large-icon mr-2">sentiment_very_dissatisfied</i>
+                                        <h3 class="mb-0 mr-4">Game over!</h3>
+                                        <a @click.stop="" href="{% url 'home' bubble_name=bubble_name %}" class="btn btn-outline-light white-outline">Leave</a>
                                     </template>
                                 </div>
                                 <p v-if="questionsAnswered==1 && quizActive"><b>Hint:</b> Click here to view question again.</p>
@@ -91,12 +92,9 @@
                                 <p v-if="questionsAnswered==3 && quizActive"><b>Hint:</b> Take a break, the timer is currently halted.</p>
                                 <p v-if="questionsAnswered==4 && quizActive"><b>Hint:</b> Don't forget the 3 jokers at the top! Hover over them to get to know them.</p>
                                 <p v-if="questionsAnswered==5 && quizActive"><b>Hint:</b> The quiz ends immediately upon either closing the browser or even reloading the page while answering a question.</p>
-                                <div v-if="!quizActive" class="mb-3 d-flex align-items-center">
-                                    <p class="m-0">
-                                        You've successfully answered [[questionsAnswered]] questions in [[formattedTime()]]. <b>This ranks your quiz [[rank]] out of [[quizesTotal]] total!</b>
-                                        Liked this quiz? Feel free to share some love by clicking the heart.
-                                    </p>
-                                    <i id="heart" class="ml-2 material-icons">favorite_outline</i>
+                                <div v-if="!quizActive" class="d-flex flex-column align-items-center">
+                                    <h5 class="m-0 mt-2 mb-3">You rank [[rank]] out of [[quizesTotal]] total with [[questionsAnswered]] correct answers in [[formattedTime()]]!</h5>
+                                    <p class="m-0 mb-2 d-flex align-items-center">Liked this quiz? Feel free to share some love by clicking the heart <i class="ml-2 medium-icon material-icons">[[heartIcon]]</i></p>
                                 </div>
                                 <h5 class="border-bottom border-light">Explanation</h5>
                                 <p>[[questionExplanation]]</p>

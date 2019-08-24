@@ -73,12 +73,12 @@ class Quiz(models.Model):
     last_access = models.DateTimeField(auto_now=True)
     helperdatetime = models.DateTimeField(null=True, blank=True)
     duration = models.IntegerField(default=0)
-    intermezzo_state = models.BooleanField(default=True)
     bubble = models.ForeignKey('Bubble', on_delete=models.CASCADE, related_name='quizes')
     joker_fiftyfifty_available = models.BooleanField(default=True)
     joker_audience_available = models.BooleanField(default=True)
     joker_timestop_available = models.BooleanField(default=True)
     timestop_active = models.BooleanField(default=False)
+    sent_love = models.BooleanField(default=False)
 
     def __str__(self):
         return f'Quiz {self.id}'
@@ -92,6 +92,7 @@ class Bubble(models.Model):
     last_access = models.DateTimeField(auto_now=True)
     public = models.BooleanField(default=False)
     reset_token = models.TextField(null=True, blank=True)
+    hearts = models.IntegerField(default=0)
 
     def __str__(self):
         return self.name

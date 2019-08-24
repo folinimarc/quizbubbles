@@ -29,6 +29,7 @@ var app = new Vue({
     jokerAudienceAvailable: true,
     jokerTimestopAvailable: true,
     hiddenAnswers: ['a', 'b', 'c', 'd'],
+    sentLove: false
   },
   mounted() {
     /* AXIOS CSRF CONFIGURATION */
@@ -45,6 +46,14 @@ var app = new Vue({
         this.quizStarted = true;
       }.bind(this), 2000);
     }.bind(this), 1000);
+  },
+  computed: {
+    answeredCorrectly: function() {
+      return this.chosenAnswer === this.correctAnswer;
+    },
+    heartIcon: function() {
+      return this.sentLove ? 'favorite' : 'favorite_outline';
+    }
   },
   methods: {
     jokerFiftyFifty: function() {
