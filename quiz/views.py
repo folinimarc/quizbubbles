@@ -372,7 +372,7 @@ class QuizView(View):
     def post(self, request, bubble_name, quiz_id):
         payload = json.loads(request.body)
         action = payload.get('action', None)
-        if action not in ['getQuizData', 'checkAnswer', 'nextQuestion', 'closeQuiz', 'jokerFiftyFifty', 'jokerAudience', 'jokerTimestop']:
+        if action not in ['getQuizData', 'checkAnswer', 'nextQuestion', 'closeQuiz', 'jokerFiftyFifty', 'jokerAudience', 'jokerTimestop', 'sendLove']:
             return JsonResponse({
                 'status': 'ERROR', 
                 'message': 'No valid action was supplied. Please report this.'

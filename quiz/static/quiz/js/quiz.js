@@ -53,7 +53,7 @@ var app = new Vue({
       return this.chosenAnswer === this.correctAnswer;
     },
     heartIcon: function() {
-      return this.canSendLove ? 'favorite-border' : 'favorite';
+      return this.canSendLove ? 'favorite_border' : 'favorite';
     },
     showHeart: function() {
       return this.answeredCorrectly && this.questionsAnswered===this.questionsTotal && this.quiztype==='Sprint';
@@ -88,6 +88,8 @@ var app = new Vue({
       }.bind(this));
     },
     nextQuestion: function() {
+      if (!this.allowFlip && this.quizStarted) return;
+      this.allowFlip = false;
       this.letters = {'a': 'A', 'b': 'B', 'c': 'C', 'd':'D'};
       this.ajaxPost({'action':'nextQuestion'}, this.startNewRound);
     },
@@ -96,7 +98,6 @@ var app = new Vue({
       this.question = Object.assign(this.question, data['question']);
       this.hiddenAnswers = ['a', 'b', 'c', 'd'];
       this.flipShowQuestion = true;
-      this.allowFlip = false;
       setTimeout(function() {
         this.answers = data['answers'];
         this.hiddenAnswers = [];
@@ -119,16 +120,16 @@ var app = new Vue({
       }.bind(this));
     },
     flipQuestion: function() {
-      if (this.awaitingAnswer) return;
+      if (!this.allowFlip) return;
       this.flipShowQuestion = !this.flipShowQuestion;
     },
     addMessage: function(message) {
       this.messages.push(message);
-      // remove after 3 seconds
+      // remove after n seconds
       setTimeout(function() {
         let i = this.messages.indexOf(message)
         if (i >= 0) this.messages.splice(i, 1);
-      }.bind(this), 3000);
+      }.bind(this), 4000);
     },
     removeMessage: function(index) {
       this.messages.splice(index, 1);
@@ -149,7 +150,9 @@ var app = new Vue({
       this.questionsAnswered = data['questionsAnswered'];
       this.questionExplanation = data['questionExplanation'];
       this.flipShowQuestion = false;
-      this.allowFlip = true;
+      setTimeout(function(){
+        this.allowFlip = true;
+      }.bind(this), 1000);
     },
     getAnswerClass: function(answer) {
       if (this.correctAnswer == answer) {
