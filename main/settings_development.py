@@ -6,6 +6,7 @@ print('-----------------')
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+DEBUG = True
 SECRET_KEY = 'ftmn@^l6akz2-il4wrcl@q2@i*k_8kj&b2(j+$h9pv&ygq4%z7'
 ALLOWED_HOSTS = ['*']
 
