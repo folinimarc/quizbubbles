@@ -25,6 +25,7 @@ MODIFIED FROM https://codepen.io/edeesims/pen/iGDzk
     position: absolute;
     width: 100%;
     backface-visibility: hidden !important;
+    -webkit-backface-visibility: hidden !important;
 }
 
 .back {
