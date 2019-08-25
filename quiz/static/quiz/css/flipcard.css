@@ -24,6 +24,7 @@ MODIFIED FROM https://codepen.io/edeesims/pen/iGDzk
 .front, .back {
     position: absolute;
     width: 100%;
+    background: inherit !important;
     backface-visibility: hidden !important;
     -webkit-backface-visibility: hidden !important;
 }
