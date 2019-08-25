@@ -206,9 +206,12 @@ class Settings(View):
             change_form = BubbleChangeForm(request.POST, instance=bubble)
             if change_form.is_valid():
                 new_bubble_name = change_form.cleaned_data['name']
-                request.session[new_bubble_name] = request.session[bubble_name]
+                if new_bubble_name != bubble_name:
+                    request.session[new_bubble_name] = str(bubble.uuid)
+                    request.session.pop(bubble_name, None)
                 bubble = change_form.save(commit=False)
-                bubble.password = make_password(change_form.cleaned_data['password1'])
+                if change_form.cleaned_data.get('password1', False) and change_form.cleaned_data.get('password2', False) and change_form.cleaned_data.get('password1', False) == change_form.cleaned_data.get('password2', False):  
+                    bubble.password = make_password(change_form.cleaned_data['password1'])
                 bubble.save()
                 messages.info(request, f'Edits were successfully applied!')
                 return redirect('home', bubble_name=new_bubble_name)
