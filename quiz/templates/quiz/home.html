@@ -57,7 +57,7 @@
                             <p class="mb-0">{{diff.difficulty}}:  <span class="{% if diff.missing %}text-warning{% else %}text-success{% endif %}">{{diff.count}}/{{diff.max}}</span></p>
                             {% endfor %}
                         {% else %}
-                        <p class="text-light">{{nr_sprint_questions}} questions in ascending difficulty. Go for it!</p>
+                        <p class="text-light">{{nr_sprint_questions}} questions in ascending difficulty. Beware: One wrong answer and you are out!</p>
                         <div class="form-group">
                             <div class="input-group">
                                 <input class="form-control" name="username-sprint" placeholder="Name" type="text" value="{{username}}"" onfocus="var temp_value=this.value; this.value=''; this.value=temp_value">
@@ -83,9 +83,9 @@
                 <div class="back h-100 bordered cursor-pointer bg-primary text-light p-3 d-flex justify-content-center align-items-center">
                     <div>
                         {% if nr_questions < 1 %}
-                        <p class="m-0">At least one question required...</p>
+                        <p class="m-0">You need to add at least one question before playing this mode...</p>
                         {% else %}
-                        <p class="text-light">All questions ({{nr_questions}}) in random order. Good luck!</p>
+                        <p class="text-light">All {{nr_questions}} questions in random order. Get as many correct as possible. Good luck!</p>
                         <div class="form-group">
                             <div class="input-group">
                                 <input class="form-control" name="username-marathon" placeholder="Name" type="text" value="{{username}}" onfocus="var temp_value=this.value; this.value=''; this.value=temp_value">
@@ -112,7 +112,7 @@
                 <div class="back h-100 bordered cursor-pointer bg-success text-light p-3 d-flex justify-content-center align-items-center">
                     <div class="nav-row">
                         <a href="{% url 'new_question' bubble_name=bubble_name %}" class="btn btn-outline-primary btn-block mb-4">Add question</a>
-                        <a href="{% url 'question_list' bubble_name=bubble_name %}" class="btn btn-outline-primary btn-block">Edit question</a>
+                        <a href="{% url 'question_list' bubble_name=bubble_name %}" class="btn btn-outline-primary btn-block">Edit questions</a>
                     </div>
                 </div>
             </div>
