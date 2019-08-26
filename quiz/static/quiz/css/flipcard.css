@@ -1,3 +1,9 @@
+/*
+Thanks to Tinclon for his amazing work in developing a cross browser flipcard!
+https://stackoverflow.com/questions/6268428/flip-card-effect-for-non-webkit-browsers
+Modified by Marc Folini 2019/08/25
+*/
+
 .flip-card {
     width: 100%;
     perspective: 1000px;
