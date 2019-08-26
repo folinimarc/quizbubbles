@@ -65,6 +65,7 @@ class Quiz(models.Model):
     quiztype = models.IntegerField(choices=QUIZTYPE)
     active = models.BooleanField(default=True)
     username = models.CharField(max_length=20)
+    questions_index = models.IntegerField(default=0)
     questions_answered = models.IntegerField(default=0)
     questions_total = models.IntegerField(default=0)
     question_ids = models.TextField()

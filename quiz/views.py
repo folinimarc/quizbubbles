@@ -274,10 +274,10 @@ class Home(View):
         ctx['nr_hearts'] = bubble.hearts
         ctx['sprint_champions'] = Quiz.objects\
             .filter(bubble_id=bubble.id, active=False, quiztype=Quiz.SPRINT)\
-            .order_by('-questions_answered', 'duration')[:settings.NR_LEADERBOARD_ENTRIES_TO_SHOW]
+            .order_by('-questions_answered', 'duration', '-enddatetime')[:settings.NR_LEADERBOARD_ENTRIES_TO_SHOW]
         ctx['marathon_champions'] = Quiz.objects\
             .filter(bubble_id=bubble.id, active=False, quiztype=Quiz.MARATHON)\
-            .order_by('-questions_answered', 'duration')[:settings.NR_LEADERBOARD_ENTRIES_TO_SHOW]
+            .order_by('-questions_answered', 'duration', '-enddatetime')[:settings.NR_LEADERBOARD_ENTRIES_TO_SHOW]
         ctx['nr_quizes'] = Quiz.objects.filter(bubble_id=bubble.id).count()
         return render(request, 'quiz/home.html', ctx)
 
@@ -357,7 +357,7 @@ class QuizView(View):
         return get_object_or_404(Quiz, id=quiz_id)
 
     def get_current_question(self, quiz):
-        question_id = int(quiz.question_ids.split(',')[quiz.questions_answered])
+        question_id = int(quiz.question_ids.split(',')[quiz.questions_index])
         return get_object_or_404(Question, id=question_id)
 
     def get_ranking(self, quiz):
@@ -382,7 +382,7 @@ class QuizView(View):
                 })
         quiz = self.get_current_quiz(quiz_id)
         if action == 'sendLove':
-            if not quiz.can_send_love or quiz.questions_answered != quiz.questions_total:
+            if quiz.quiztype != Quiz.SPRINT or not quiz.can_send_love or quiz.questions_answered != quiz.questions_total:
                 return JsonResponse({
                     'status': 'ERROR',
                     'message': 'There was a problem with sending love :(',
@@ -394,6 +394,7 @@ class QuizView(View):
             bubble.save()
             return JsonResponse({
                     'status': 'OK',
+                    'message': 'You added a heart to the quizbubble.'
             })
         if not quiz.active:
             return JsonResponse({
@@ -410,6 +411,7 @@ class QuizView(View):
                 'timePassed': quiz.duration,
                 'rank': rank,
                 'quizesTotal': quizes_total,
+                'questionsIndex': quiz.questions_index,
                 'questionsAnswered': quiz.questions_answered,
                 'questionsTotal': quiz.questions_total,
                 })
@@ -426,6 +428,7 @@ class QuizView(View):
             chosen_answers_count = json.loads(question.chosen_answers_count)
             return JsonResponse({
                     'status': 'OK', 
+                    'message': 'Audience joker: See what others have chosen.',
                     'chosen_answers_count': chosen_answers_count
                     })
         if action == 'jokerFiftyFifty':
@@ -440,7 +443,8 @@ class QuizView(View):
             question = self.get_current_question(quiz)
             kill = random.sample({'a','b','c','d'}.difference({question.correct_answer}), 2)
             return JsonResponse({
-                    'status': 'OK', 
+                    'status': 'OK',
+                    'message': 'Fifty-fifty joker: Removed two wrong answers.',
                     'kill': kill
                     })
         if action == 'jokerTimestop':
@@ -454,7 +458,8 @@ class QuizView(View):
             quiz.timestop_active = True
             quiz.save()
             return JsonResponse({
-                    'status': 'OK', 
+                    'status': 'OK',
+                    'message': 'Timestopper joker: Timer reset and stopped.',
                     'timePassed': quiz.duration
                     })
 
@@ -466,7 +471,7 @@ class QuizView(View):
             return JsonResponse({
                 'status': 'OK',
                 'question': {
-                    'header': f'Question {quiz.questions_answered + 1} ({question.get_difficulty_display()})',
+                    'header': f'Question {quiz.questions_index + 1} ({question.get_difficulty_display()})',
                     'body': question.question,
                 },
                 'answers': {
@@ -495,12 +500,13 @@ class QuizView(View):
             question.chosen_answers_count = json.dumps(chosen_answers_count)
             question.save()
             # check answer
+            quiz.questions_index += 1
+            if quiz.questions_index == quiz.questions_total:
+                quiz.active = False
+                quiz.enddatetime = timezone.now()
             if answer == question.correct_answer:
                 quiz.questions_answered += 1
-                if quiz.questions_answered == quiz.questions_total:
-                    quiz.active = False
-                    quiz.enddatetime = timezone.now()
-            else:
+            elif quiz.quiztype == Quiz.SPRINT:
                 quiz.active = False
                 quiz.enddatetime = timezone.now()
             quiz.save()
@@ -511,6 +517,7 @@ class QuizView(View):
                 'correctAnswer': question.correct_answer,
                 'rank': rank,
                 'quizActive': quiz.active,
+                'questionsIndex': quiz.questions_index,
                 'questionsAnswered': quiz.questions_answered,
                 'questionExplanation': question.explanation
                 })

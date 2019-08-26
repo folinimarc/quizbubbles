@@ -19,6 +19,7 @@ var app = new Vue({
     quiztype: 'Loading...',
     question: {'header': '', 'body': ''},
     questionExplanation: '',
+    questionsIndex: 0,
     questionsAnswered: 0,
     questionsTotal: 0,
     answers: {'a': '', 'b': '', 'c': '', 'd':''},
@@ -26,6 +27,7 @@ var app = new Vue({
     questionHeader: '',
     chosenAnswer: null,
     correctAnswer: null,
+    showSummary: false,
     jokerFiftyFiftyAvailable: true,
     jokerAudienceAvailable: true,
     jokerTimestopAvailable: true,
@@ -114,10 +116,17 @@ var app = new Vue({
         this.quizesTotal = data['quizesTotal'];
         this.quiztype = data['quiztype'];
         this.rank = data['rank'];
+        this.questionsIndex = data['questionsIndex'];
         this.questionsAnswered = data['questionsAnswered'];
         this.questionsTotal = data['questionsTotal'];
         this.nextQuestion();
       }.bind(this));
+    },
+    requestSummary() {
+      this.showSummary = true;
+      this.flipQuestion();
+      this.allowFlip = false;
+      this.hiddenAnswers = ['a', 'b', 'c', 'd'];
     },
     flipQuestion: function() {
       if (!this.allowFlip) return;
@@ -139,6 +148,7 @@ var app = new Vue({
       this.awaitingAnswer = false;
       this.chosenAnswer = event.target.id;
       this.stopTimer();
+      this.choseHint();
       this.ajaxPost({'action':'checkAnswer', 'answer': this.chosenAnswer}, this.checkAnswer);
     },
     checkAnswer: function(response) {
@@ -147,6 +157,7 @@ var app = new Vue({
       this.correctAnswer = data['correctAnswer'];
       this.rank = data['rank'];
       this.quizActive = data['quizActive'];
+      this.questionsIndex = data['questionsIndex'];
       this.questionsAnswered = data['questionsAnswered'];
       this.questionExplanation = data['questionExplanation'];
       this.flipShowQuestion = false;
