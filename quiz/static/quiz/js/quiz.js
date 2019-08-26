@@ -32,7 +32,16 @@ var app = new Vue({
     jokerAudienceAvailable: true,
     jokerTimestopAvailable: true,
     hiddenAnswers: ['a', 'b', 'c', 'd'],
-    canSendLove: true
+    canSendLove: true,
+    hint: '',
+    hints: [
+      'The quiz ends immediately upon either closing the browser or even reloading the page while answering a question.',
+      'Don\'t forget the 3 jokers at the top! Hover over them to get to know them.',
+      'Take a break, the timer is currently halted.',
+      'The explanation below may contain interesting additional information.',
+      'Click here to view question again.',
+      'Your performance is ranked by the number of questions answered and the time it took you.',
+    ]
   },
   mounted() {
     /* AXIOS CSRF CONFIGURATION */
@@ -62,6 +71,15 @@ var app = new Vue({
     }
   },
   methods: {
+    choseHint() {
+      if (this.hints.length == 0) {
+        this.hint = '';
+      } else {
+        this.hint = this.hints.splice(Math.floor(Math.random()*this.hints.length), 1)[0];
+        console.log(this.hint)
+      }
+
+    },
     sendLove() {
       if (!this.canSendLove) return;
       this.canSendLove = false;
