@@ -34,6 +34,7 @@ var app = new Vue({
     hiddenAnswers: ['a', 'b', 'c', 'd'],
     canSendLove: true,
     hint: '',
+    converter: null,
     hints: [
       'The quiz ends immediately upon either closing the browser or even reloading the page while answering a question.',
       'Don\'t forget the 3 jokers at the top! Hover over them to get to know them.',
@@ -52,8 +53,9 @@ var app = new Vue({
     /* make content visible */
     document.getElementById('app-wrapper').classList.remove('opacity-zero');
     /* start quiz */
+    this.getQuizData();
     setTimeout(function() {
-      this.getQuizData();
+      this.nextQuestion();
       setTimeout(function() {
         this.quizStarted = true;
       }.bind(this), 2000);
@@ -71,16 +73,32 @@ var app = new Vue({
     }
   },
   methods: {
-    choseHint() {
+    converterFactory: function(arr) {
+      let arr_copy = arr.slice();
+      let mapping = {};
+      for (let k of arr) {
+        mapping[k] = arr_copy.splice(Math.floor(Math.random()*arr_copy.length), 1)[0];
+      }
+      let reverseMapping = {}
+      Object.keys(mapping).forEach(function(key) {
+        reverseMapping[mapping[key]] = key;
+      });
+      return function convert(val, reverse=false) {
+        if (!reverse) {
+          return mapping[val];
+        } else {
+          return reverseMapping[val];
+        }
+      }
+    },
+    choseHint: function() {
       if (this.hints.length == 0) {
         this.hint = '';
       } else {
         this.hint = this.hints.splice(Math.floor(Math.random()*this.hints.length), 1)[0];
-        console.log(this.hint)
       }
-
     },
-    sendLove() {
+    sendLove: function() {
       if (!this.canSendLove) return;
       this.canSendLove = false;
       this.ajaxPost({'action':'sendLove'}, function() {});
@@ -89,14 +107,22 @@ var app = new Vue({
       if (!this.awaitingAnswer || !this.jokerFiftyFiftyAvailable) return;
       this.jokerFiftyFiftyAvailable = false;
       this.ajaxPost({'action':'jokerFiftyFifty'}, function(response) {
-        this.hiddenAnswers = response.data['kill'];
+        let data = response.data;
+        this.hiddenAnswers = [];
+        data['kill'].forEach(function(item) {
+          this.hiddenAnswers.push(this.converter(item));
+        }.bind(this));
       }.bind(this));
     },
     jokerAudience: function() {
       if (!this.awaitingAnswer || !this.jokerAudienceAvailable) return;
       this.jokerAudienceAvailable = false;
       this.ajaxPost({'action':'jokerAudience'}, function(response) {
-        this.letters = response.data['chosen_answers_count'];
+        let data = response.data;
+        this.letters = {};
+        Object.keys(data['chosen_answers_count']).forEach(function(key) {
+          this.letters[this.converter(key)] = data['chosen_answers_count'][key];
+        }.bind(this));
       }.bind(this));
     },
     jokerTimestop: function() {
@@ -111,6 +137,7 @@ var app = new Vue({
       if (!this.allowFlip && this.quizStarted) return;
       this.allowFlip = false;
       this.letters = {'a': 'A', 'b': 'B', 'c': 'C', 'd':'D'};
+      this.converter = this.converterFactory(['a', 'b', 'c', 'd']);
       this.ajaxPost({'action':'nextQuestion'}, this.startNewRound);
     },
     startNewRound: function(response) {
@@ -119,7 +146,10 @@ var app = new Vue({
       this.hiddenAnswers = ['a', 'b', 'c', 'd'];
       this.flipShowQuestion = true;
       setTimeout(function() {
-        this.answers = data['answers'];
+        this.answers = {}
+        Object.keys(data['answers']).forEach(function(key) {
+          this.answers[this.converter(key)] = data['answers'][key];
+        }.bind(this));
         this.hiddenAnswers = [];
         this.awaitingAnswer = true;
         this.chosenAnswer = null;
@@ -137,10 +167,9 @@ var app = new Vue({
         this.questionsIndex = data['questionsIndex'];
         this.questionsAnswered = data['questionsAnswered'];
         this.questionsTotal = data['questionsTotal'];
-        this.nextQuestion();
       }.bind(this));
     },
-    requestSummary() {
+    requestSummary: function() {
       this.showSummary = true;
       this.flipQuestion();
       this.allowFlip = false;
@@ -167,12 +196,12 @@ var app = new Vue({
       this.chosenAnswer = event.target.id;
       this.stopTimer();
       this.choseHint();
-      this.ajaxPost({'action':'checkAnswer', 'answer': this.chosenAnswer}, this.checkAnswer);
+      this.ajaxPost({'action':'checkAnswer', 'answer': this.converter(this.chosenAnswer, true)}, this.checkAnswer);
     },
     checkAnswer: function(response) {
       const data = response.data;
       this.timePassed = data['timePassed'];
-      this.correctAnswer = data['correctAnswer'];
+      this.correctAnswer = this.converter(data['correctAnswer']);
       this.rank = data['rank'];
       this.quizActive = data['quizActive'];
       this.questionsIndex = data['questionsIndex'];

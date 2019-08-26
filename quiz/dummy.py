@@ -33,10 +33,10 @@ def setup():
             for k in range(questions_per_difficulty):
                 Question.objects.create(
                     question=randStr(400),
-                    answer_a=randStr(160),
-                    answer_b=randStr(160),
-                    answer_c=randStr(160),
-                    answer_d=randStr(160),
+                    answer_a='A:' + randStr(160),
+                    answer_b='B:' + randStr(160),
+                    answer_c='C:' + randStr(160),
+                    answer_d='D:' + randStr(160),
                     correct_answer=Question.ANSWER_A,
                     difficulty=difficulty[0],
                     explanation=randStr(400),
