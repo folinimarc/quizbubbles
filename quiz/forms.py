@@ -1,5 +1,6 @@
 from django import forms
 from .models import *
+from captcha.fields import ReCaptchaField
 
 
 class QuestionModelForm(forms.ModelForm):
@@ -56,11 +57,12 @@ class BubbleCreateForm(forms.ModelForm):
     
     password1 = forms.CharField(max_length=20, widget=forms.PasswordInput(attrs={'placeholder': 'Password'}))
     password2 = forms.CharField(max_length=20, widget=forms.PasswordInput(attrs={'placeholder': 'Repeat password'}))
+    captcha = ReCaptchaField()
 
     prefix='create'
     class Meta:
         model = Bubble
-        fields = ('name', 'email', 'password1', 'password2', 'public')
+        fields = ('name', 'email', 'password1', 'password2', 'public', 'captcha')
         widgets = {
             'name': forms.TextInput(attrs={'placeholder': 'Bubblename'}),
             'email': forms.TextInput(attrs={'placeholder': 'Email (public)'}),
@@ -103,6 +105,7 @@ class BubbleDeleteForm(forms.Form):
 class BubblePasswordResetForm(forms.Form):
     password1 = forms.CharField(max_length=20, widget=forms.PasswordInput(attrs={'placeholder': 'Password'}))
     password2 = forms.CharField(max_length=20, widget=forms.PasswordInput(attrs={'placeholder': 'Repeat password'}))
+    captcha = ReCaptchaField()
 
     def clean(self):
         cleaned_data = super(BubblePasswordResetForm, self).clean()

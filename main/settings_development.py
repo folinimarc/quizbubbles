@@ -17,6 +17,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'captcha',
     'crispy_forms',
     'quiz',
 ]
@@ -91,3 +92,6 @@ NR_LEADERBOARD_ENTRIES_TO_SHOW = 10
 
 # crispy forms template pack
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
+
+# recaptcha
+SILENCED_SYSTEM_CHECKS = ['captcha.recaptcha_test_key_error']
