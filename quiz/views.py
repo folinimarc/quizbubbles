@@ -123,7 +123,7 @@ class ForgotPassword(View):
         send_mail(
             subject,
             body,
-            'info@quizbubble.com',
+            'team@quizbubbles.com',
             [bubble.email],
             fail_silently=False,
         )
