@@ -1,6 +1,7 @@
 from django import forms
 from .models import *
 from captcha.fields import ReCaptchaField
+from captcha.widgets import ReCaptchaV2Checkbox
 
 
 class QuestionModelForm(forms.ModelForm):
@@ -57,7 +58,7 @@ class BubbleCreateForm(forms.ModelForm):
     
     password1 = forms.CharField(max_length=20, widget=forms.PasswordInput(attrs={'placeholder': 'Password'}))
     password2 = forms.CharField(max_length=20, widget=forms.PasswordInput(attrs={'placeholder': 'Repeat password'}))
-    captcha = ReCaptchaField()
+    captcha = ReCaptchaField(widget=ReCaptchaV2Checkbox(api_params={'onload': 'adjustHeight'}))
 
     prefix='create'
     class Meta:
@@ -105,7 +106,6 @@ class BubbleDeleteForm(forms.Form):
 class BubblePasswordResetForm(forms.Form):
     password1 = forms.CharField(max_length=20, widget=forms.PasswordInput(attrs={'placeholder': 'Password'}))
     password2 = forms.CharField(max_length=20, widget=forms.PasswordInput(attrs={'placeholder': 'Repeat password'}))
-    captcha = ReCaptchaField()
 
     def clean(self):
         cleaned_data = super(BubblePasswordResetForm, self).clean()
@@ -113,3 +113,7 @@ class BubblePasswordResetForm(forms.Form):
         password2 = cleaned_data.get('password2')
         if password1 != password2:
             self.add_error('password2', 'Passwords did not match.')
+
+
+class BubblePasswordRequestForm(forms.Form):
+    captcha = ReCaptchaField()

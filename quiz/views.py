@@ -107,10 +107,22 @@ class ForgotPassword(View):
         ctx['bubble'] = get_object_or_404(Bubble, name=bubble_name)
         return render(request, 'quiz/forgot_password.html', ctx)
 
+
+class RequestPassword(View):
+    def get(self, request, bubble_name):
+        ctx = {}
+        ctx['bubble'] = get_object_or_404(Bubble, name=bubble_name)
+        ctx['request_form'] = BubblePasswordRequestForm()
+        return render(request, 'quiz/request_password.html', ctx)
+
     @transaction.atomic
     def post(self, request, bubble_name):
         ctx = {}
-        ctx['bubble_name'] = bubble_name
+        request_form = BubblePasswordRequestForm(request.POST)
+        if not request_form.is_valid():
+            ctx['bubble'] = get_object_or_404(Bubble, name=bubble_name)
+            ctx['request_form'] = request_form
+            return render(request, 'quiz/request_password.html', ctx)
         bubble = get_object_or_404(Bubble, name=bubble_name)
         timestamp = str(int(time.time()))
         token = Signer().sign('-'.join([timestamp, bubble.name]))

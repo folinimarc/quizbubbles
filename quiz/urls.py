@@ -5,6 +5,7 @@ urlpatterns = [
     path('', Login.as_view(), name='login'),
     path('passwordreset/<str:token>', PasswordReset.as_view(), name='password_reset'),
     path('<slug:bubble_name>/forgotpassword', ForgotPassword.as_view(), name='forgot_password'),
+    path('<slug:bubble_name>/requestpassword', RequestPassword.as_view(), name='request_password'),
     path('<slug:bubble_name>/logout', Logout.as_view(), name='logout'),
     path('<slug:bubble_name>', Home.as_view(), name='home'),
     path('<slug:bubble_name>/settings', Settings.as_view(), name='settings'),
