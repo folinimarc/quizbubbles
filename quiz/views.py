@@ -119,7 +119,7 @@ class ForgotPassword(View):
         formatted_time_now = timezone.now().strftime('%Y-%m-%d %H:%M:%S')
         subject = f'Password reset request of quizbubble {bubble.name} on {formatted_time_now} UTC'
         reset_link = request.build_absolute_uri(reverse('password_reset', kwargs={'token': token}))
-        body = f'The following link will be valid for one hour to reset your password of bubble {bubble.name}:\n\n{reset_link}\n\nKind regards from the quizbubble team'
+        body = f'The following link will be valid for one hour to reset your password of bubble {bubble.name}:\n\n{reset_link}\n\nKind regards from the quizbubbles team'
         send_mail(
             subject,
             body,
