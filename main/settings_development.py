@@ -86,8 +86,8 @@ EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
 EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'mail')
 
 # QUIZ APP
-SPRINT_NR_QUESTIONS_PER_DIFFICULTY = 5
-NR_LEADERBOARD_ENTRIES_TO_SHOW = 5
+SPRINT_NR_QUESTIONS_PER_DIFFICULTY = 4
+NR_LEADERBOARD_ENTRIES_TO_SHOW = 10
 
 # crispy forms template pack
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
