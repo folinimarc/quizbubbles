@@ -2,3 +2,5 @@ conf/
 .vscode/
 
 db.sqlite3
+.vscode/settings.json
+*.pyc
