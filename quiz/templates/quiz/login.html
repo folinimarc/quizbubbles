@@ -24,57 +24,54 @@
 
 {% block content %}
 {% csrf_token %}
-<div id="spinner" class="position-absolute w-100 h-100vh opacity-fade d-flex justify-content-center align-items-center">
-    <span class="text-light spinner-border"></span>
-</div>
-<section id="main-container" class="opacity-zero opacity-fade">
-    <!-- messages -->
-    {% include 'quiz/includes/messages.html' %}
-    <div class="row mt-5">
-        <!-- join / create -->
-        <div class="col-12">
-            <h1 class="mb-2 display-4 text-light text-center border-bottom border-light">Welcome to QuizBubbles</h1>
-            <h4 class="mb-5 display-5 text-light text-center">Create Share Challenge</h4>
-            <!-- flipcard -->
-            <div id="flipcard" class="{% if not flipShowJoin %}flipped{% endif %} flip-card">
-                <div class="content">
-                    <!-- front -->
-                    <div class="front p-3 d-flex flex-column justify-content-center align-items-center">
-                        <form class="hide-labels smaller-controls" method="post">
-                            {% csrf_token %}
-                            {{ join_form|crispy }}
-                            <div class="form-row">
-                                <div class="pr-1 w-50">
-                                    <button type="button" class="toggle-card btn btn-outline-light btn-block d-flex justify-content-center align-items-center"><i class="material-icons">loop</i> <span>Create</span></button>
-                                </div>
-                                <div class="pl-1 w-50">
-                                    <button type="submit" name="join" class="btn btn-primary btn-block">Join</button>
-                                </div>
-                                {% if wrong_password %}
-                                <a href="{% url 'forgot_password' bubble_name=bubble_name %}" class="text-light mt-2 p-1"><small>Forgot password?</small></a>
-                                {% endif %}
+<!-- messages -->
+{% include 'quiz/includes/messages.html' %}
+<div class="row mt-5">
+    <!-- join / create -->
+    <div class="col-12">
+        <h1 class="mb-2 display-4 text-light text-center border-bottom border-light">Welcome to QuizBubbles</h1>
+        <h4 class="mb-5 display-5 text-light text-center">Create Share Challenge</h4>
+        <!-- flipcard -->
+        <div id="flipcard" class="{% if not flipShowJoin %}flipped{% endif %} flip-card">
+            <div class="content">
+                <!-- front -->
+                <div class="front p-3 d-flex flex-column justify-content-center align-items-center">
+                    <form class="hide-labels smaller-controls" method="post">
+                        {% csrf_token %}
+                        {{ join_form|crispy }}
+                        <div class="form-row">
+                            <div class="pr-1 w-50">
+                                <button type="button" class="toggle-card btn btn-outline-light btn-block d-flex justify-content-center align-items-center"><i class="material-icons">loop</i> <span>Create</span></button>
                             </div>
-                        </form>
-                    </div>
-                    <!-- back -->
-                    <div class="back p-4 d-flex justify-content-center align-items-center">
-                        <form class="hide-labels smaller-controls" method="post">
-                            {% csrf_token %}
-                            {{ create_form|crispy }}
-                            <div class="form-row">
-                                <div class="w-50 pr-1">
-                                    <button type="button" class="toggle-card btn btn-outline-light btn-block d-flex justify-content-center align-items-center"><i class="material-icons">loop</i> <span>Join</span></button>
-                                </div>
-                                <div class="w-50 pl-1">
-                                    <button type="submit" name="create" class="btn btn-primary btn-block">Create</button>
-                                </div>
+                            <div class="pl-1 w-50">
+                                <button type="submit" name="join" class="btn btn-primary btn-block">Join</button>
                             </div>
-                        </form>
-                    </div>
+                            {% if wrong_password %}
+                            <a href="{% url 'forgot_password' bubble_name=bubble_name %}" class="text-light mt-2 p-1"><small>Forgot password?</small></a>
+                            {% endif %}
+                        </div>
+                    </form>
+                </div>
+                <!-- back -->
+                <div class="back p-4 d-flex justify-content-center align-items-center">
+                    <form class="hide-labels smaller-controls" method="post">
+                        {% csrf_token %}
+                        {{ create_form|crispy }}
+                        <div class="form-row">
+                            <div class="w-50 pr-1">
+                                <button type="button" class="toggle-card btn btn-outline-light btn-block d-flex justify-content-center align-items-center"><i class="material-icons">loop</i> <span>Join</span></button>
+                            </div>
+                            <div class="w-50 pl-1">
+                                <button type="submit" name="create" class="btn btn-primary btn-block">Create</button>
+                            </div>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
+</div>
+<section id="table-container" class="opacity-zero opacity-fade">
     <div class="row my-5">
         <!-- public quizes list -->
         <div class="col-12">
