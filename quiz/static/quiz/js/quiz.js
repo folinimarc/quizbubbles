@@ -48,8 +48,6 @@ var app = new Vue({
     /* AXIOS CSRF CONFIGURATION */
     axios.defaults.xsrfCookieName = 'csrftoken'
     axios.defaults.xsrfHeaderName = "X-CSRFTOKEN"
-    /* Handle window leave */
-    window.addEventListener('beforeunload', this.handleLeave);
     /* make content visible */
     document.getElementById('app-wrapper').classList.remove('opacity-zero');
     /* start quiz */
@@ -60,6 +58,10 @@ var app = new Vue({
         this.quizStarted = true;
       }.bind(this), 2000);
     }.bind(this), 1000);
+    // periodically send heartbeat
+    setInterval(function() {
+      this.ajaxPost({'action':'sendHeartbeat'}, function() {});
+    }.bind(this), 10000);
   },
   computed: {
     answeredCorrectly: function() {
@@ -248,11 +250,6 @@ var app = new Vue({
       let seconds = this.timePassed - minutes * 60;
       let padding = seconds < 10 ? '0' : '';
       return minutes.toString() + ':' + padding + seconds.toString();
-    },
-    handleLeave: function() {
-      if (this.quizActive) {
-        this.ajaxPost({'action':'closeQuiz'}, function(response) {});
-      }
     },
     handleError: function(errorMsg) {
       this.errorOccured = true;

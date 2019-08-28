@@ -1,5 +1,4 @@
 from django.db import models
-import uuid
 import json
 
 class Question(models.Model):
@@ -61,9 +60,17 @@ class Quiz(models.Model):
         (MARATHON, 'Marathon'),
     )
 
-    uuid = models.UUIDField(default=uuid.uuid4)
+    INITIALIZED = 0
+    IN_PROGRESS = 1
+    FINISHED = 2
+    QUIZSTATE = (
+        (INITIALIZED, 'Initialized'),
+        (IN_PROGRESS, 'In progress'),
+        (FINISHED, 'Finished')
+    )
+
     quiztype = models.IntegerField(choices=QUIZTYPE)
-    active = models.BooleanField(default=True)
+    quizstate = models.IntegerField(choices=QUIZSTATE, default=INITIALIZED)
     username = models.CharField(max_length=20)
     questions_index = models.IntegerField(default=0)
     questions_answered = models.IntegerField(default=0)
@@ -80,12 +87,12 @@ class Quiz(models.Model):
     joker_timestop_available = models.BooleanField(default=True)
     timestop_active = models.BooleanField(default=False)
     can_send_love = models.BooleanField(default=True)
+    heartbeat_timestamp = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return f'Quiz {self.id}'
 
 class Bubble(models.Model):
-    uuid = models.UUIDField(default=uuid.uuid4)
     name = models.SlugField(max_length=20)
     email = models.EmailField()
     password = models.TextField()
@@ -94,6 +101,7 @@ class Bubble(models.Model):
     public = models.BooleanField(default=False)
     reset_token = models.TextField(null=True, blank=True)
     hearts = models.IntegerField(default=0)
+    last_cleanup = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return self.name

@@ -96,7 +96,7 @@ class BubbleCreateForm(BubbleChangeForm):
     def clean(self):
         cleaned_data = super(BubbleCreateForm, self).clean()
         bubble = Bubble.objects.filter(name=cleaned_data.get('name', None))
-        if bubble and bubble[0].uuid != self.instance.uuid:
+        if bubble and bubble[0].id != self.instance.id:
             self.add_error('name', 'Name already in use')
         return cleaned_data
 

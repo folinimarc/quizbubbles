@@ -11,10 +11,10 @@ from django.contrib import messages
 from django.contrib.auth.hashers import make_password, check_password
 from django.core.mail import send_mail
 from django.core.signing import Signer, BadSignature
-import uuid
 import time
 import json
 import random
+from datetime import timedelta
 from .decorators import *
 from .models import *
 from .forms import *
@@ -71,7 +71,7 @@ class Login(View):
                         join_form.add_error('password', 'This bubble requires a password')
                 else:
                     if check_password(password, bubble.password):
-                        request.session[bubble.name] = str(bubble.uuid)
+                        request.session[bubble.name] = str(bubble.id)
                         request.session.set_expiry(0)
                         return redirect('home', bubble_name=bubble.name)
                     else:
@@ -96,7 +96,7 @@ class Login(View):
                     public = create_form.cleaned_data['public']
                 )
                 messages.info(request, f'New quizebubble \"{create_form.cleaned_data["name"]}\" successfully created. Have fun!')
-                request.session[bubble.name] = str(bubble.uuid)
+                request.session[bubble.name] = str(bubble.id)
                 request.session.set_expiry(0)
                 return redirect('home', bubble_name=bubble.name)
             ctx['flipShowJoin'] = False
@@ -107,6 +107,7 @@ class Login(View):
         return redirect('login')
 
 
+@method_decorator([close_quiz(methods=['GET'])], name='dispatch')
 class Logout(View):
     def get(self, request, bubble_name):
         request.session.pop(bubble_name, None)
@@ -237,7 +238,7 @@ class Settings(View):
             if change_form.is_valid():
                 new_bubble_name = change_form.cleaned_data['name']
                 if new_bubble_name != bubble_name:
-                    request.session[new_bubble_name] = str(bubble.uuid)
+                    request.session[new_bubble_name] = str(bubble.id)
                     request.session.pop(bubble_name, None)
                 bubble = change_form.save(commit=False)
                 if change_form.cleaned_data.get('password1', False) and change_form.cleaned_data.get('password2', False) and change_form.cleaned_data.get('password1', False) == change_form.cleaned_data.get('password2', False):  
@@ -253,7 +254,7 @@ class Settings(View):
         return redirect('home', bubble_name=bubble_name)
 
 
-@method_decorator([check_bubble_permission(authenticated_only=False)], name='dispatch')
+@method_decorator([check_bubble_permission(authenticated_only=False), close_quiz(methods=['GET'])], name='dispatch')
 class Home(View):
 
     def get_sprint_question_ids(self, bubble):
@@ -273,14 +274,22 @@ class Home(View):
         questions_total = len(question_list)
         return questions_total, ','.join(str(id) for id in question_list)
 
+    @transaction.atomic
     def get(self, request, bubble_name):
         ctx = {}
         ctx['bubble_name'] = bubble_name
         ctx['username'] = request.session.get('username', '')
         bubble = Bubble.objects.get(name=bubble_name)
-        bubble.last_access = timezone.now()
+        time_since_cleanup = timezone.now() - bubble.last_cleanup
+        if time_since_cleanup.seconds > 360:
+            time_treshold = timezone.now() - timedelta(minutes=1)
+            a = Quiz.objects.filter(bubble_id=bubble.id, heartbeat_timestamp__lt=time_treshold).update(
+                quizstate=Quiz.FINISHED,
+                enddatetime=F('heartbeat_timestamp') + timedelta(seconds=10)
+                )
+            bubble.last_cleanup = timezone.now()
         bubble.save()
-        ctx['authenticated'] = request.session.get(bubble_name, None) == str(bubble.uuid)
+        ctx['authenticated'] = request.session.get(bubble_name, None) == str(bubble.id)
         difficulty_counts = Question.objects.filter(bubble_id=bubble.id).values('difficulty').annotate(count=Count('difficulty'))
         difficulty_dict = OrderedDict()
         for db_val, verbose in sorted(Question.DIFFICULTIES, key=lambda x: x[0]):
@@ -303,10 +312,10 @@ class Home(View):
         ctx['nr_questions'] = nr_questions
         ctx['nr_hearts'] = bubble.hearts
         ctx['sprint_champions'] = Quiz.objects\
-            .filter(bubble_id=bubble.id, active=False, quiztype=Quiz.SPRINT)\
+            .filter(bubble_id=bubble.id, quizstate=Quiz.FINISHED, quiztype=Quiz.SPRINT)\
             .order_by('-questions_answered', 'duration', '-enddatetime')[:settings.NR_LEADERBOARD_ENTRIES_TO_SHOW]
         ctx['marathon_champions'] = Quiz.objects\
-            .filter(bubble_id=bubble.id, active=False, quiztype=Quiz.MARATHON)\
+            .filter(bubble_id=bubble.id, quizstate=Quiz.FINISHED, quiztype=Quiz.MARATHON)\
             .order_by('-questions_answered', 'duration', '-enddatetime')[:settings.NR_LEADERBOARD_ENTRIES_TO_SHOW]
         ctx['nr_quizes'] = Quiz.objects.filter(bubble_id=bubble.id).count()
         return render(request, 'quiz/home.html', ctx)
@@ -343,7 +352,7 @@ class Home(View):
             question_ids=question_ids,
             bubble_id=bubble.id
             )
-        request.session[str(quiz.id)] = str(quiz.uuid)
+        request.session['session_quiz_id'] = str(quiz.id)
         request.session['username'] = form.cleaned_data['username']
         return JsonResponse({
                 'status': 'OK', 
@@ -383,19 +392,20 @@ class NewQuestion(View):
 @method_decorator([check_bubble_permission(authenticated_only=False), check_quiz_permission], name='dispatch')
 class QuizView(View):
 
-    def get_current_quiz(self, quiz_id):
+    def get_quiz(self, quiz_id):
         return get_object_or_404(Quiz, id=quiz_id)
 
-    def get_current_question(self, quiz):
+    def get_question(self, quiz):
         question_id = int(quiz.question_ids.split(',')[quiz.questions_index])
         return get_object_or_404(Question, id=question_id)
 
     def get_ranking(self, quiz):
-        outperform_questions = Quiz.objects.filter(bubble_id=quiz.bubble_id, active=False, quiztype=quiz.quiztype, questions_answered__gt=quiz.questions_answered).count()
-        outperform_time = Quiz.objects.filter(bubble_id=quiz.bubble_id, active=False, quiztype=quiz.quiztype, questions_answered=quiz.questions_answered, duration__lt=quiz.duration).count()
+        outperform_questions = Quiz.objects.filter(bubble_id=quiz.bubble_id, quizstate=Quiz.FINISHED, quiztype=quiz.quiztype, questions_answered__gt=quiz.questions_answered).count()
+        outperform_time = Quiz.objects.filter(bubble_id=quiz.bubble_id, quizstate=Quiz.FINISHED, quiztype=quiz.quiztype, questions_answered=quiz.questions_answered, duration__lt=quiz.duration).count()
         rank = outperform_questions + outperform_time + 1
         return rank
 
+    @transaction.atomic
     def get(self, request, bubble_name, quiz_id):
         ctx = {}
         ctx['bubble_name'] = bubble_name
@@ -405,12 +415,17 @@ class QuizView(View):
     def post(self, request, bubble_name, quiz_id):
         payload = json.loads(request.body)
         action = payload.get('action', None)
-        if action not in ['getQuizData', 'checkAnswer', 'nextQuestion', 'closeQuiz', 'jokerFiftyFifty', 'jokerAudience', 'jokerTimestop', 'sendLove']:
+        if action not in ['sendHeartbeat', 'getQuizData', 'checkAnswer', 'nextQuestion', 'jokerFiftyFifty', 'jokerAudience', 'jokerTimestop', 'sendLove']:
             return JsonResponse({
                 'status': 'ERROR', 
                 'message': 'No valid action was supplied. Please report this.'
                 })
-        quiz = self.get_current_quiz(quiz_id)
+        quiz = self.get_quiz(quiz_id)
+        if action == 'sendHeartbeat':
+            quiz.heartbeat_timestamp = timezone.now()
+            return JsonResponse({
+                'status': 'OK',
+                })
         if action == 'sendLove':
             if quiz.quiztype != Quiz.SPRINT or not quiz.can_send_love or quiz.questions_answered != quiz.questions_total:
                 return JsonResponse({
@@ -426,15 +441,14 @@ class QuizView(View):
                     'status': 'OK',
                     'message': 'You added a heart to the quizbubble.'
             })
-        if not quiz.active:
+        if quiz.quizstate != Quiz.IN_PROGRESS:
             return JsonResponse({
                 'status': 'ERROR',
                 'message': f'This quiz is not active anymore. Please start a new quiz.'
                 })
         if action == 'getQuizData':
-            quiz = self.get_current_quiz(quiz_id)
             rank = self.get_ranking(quiz)
-            quizes_total = Quiz.objects.filter(bubble_id=quiz.bubble_id, active=False, quiztype=quiz.quiztype).count() + 1
+            quizes_total = Quiz.objects.filter(bubble_id=quiz.bubble_id, quizstate=Quiz.FINISHED, quiztype=quiz.quiztype).count() + 1
             return JsonResponse({
                 'status': 'OK',
                 'quiztype': quiz.get_quiztype_display(),
@@ -446,7 +460,6 @@ class QuizView(View):
                 'questionsTotal': quiz.questions_total,
                 })
         if action == 'jokerAudience':
-            quiz = self.get_current_quiz(quiz_id)
             if not quiz.joker_audience_available:
                 return JsonResponse({
                     'status': 'ERROR',
@@ -454,7 +467,7 @@ class QuizView(View):
                     })
             quiz.joker_audience_available = False
             quiz.save()
-            question = self.get_current_question(quiz)
+            question = self.get_question(quiz)
             chosen_answers_count = json.loads(question.chosen_answers_count)
             return JsonResponse({
                     'status': 'OK', 
@@ -462,7 +475,6 @@ class QuizView(View):
                     'chosen_answers_count': chosen_answers_count
                     })
         if action == 'jokerFiftyFifty':
-            quiz = self.get_current_quiz(quiz_id)
             if not quiz.joker_fiftyfifty_available:
                 return JsonResponse({
                     'status': 'ERROR',
@@ -470,7 +482,7 @@ class QuizView(View):
                     })
             quiz.joker_fiftyfifty_available = False
             quiz.save()
-            question = self.get_current_question(quiz)
+            question = self.get_question(quiz)
             kill = random.sample({'a','b','c','d'}.difference({question.correct_answer}), 2)
             return JsonResponse({
                     'status': 'OK',
@@ -478,7 +490,6 @@ class QuizView(View):
                     'kill': kill
                     })
         if action == 'jokerTimestop':
-            quiz = self.get_current_quiz(quiz_id)
             if not quiz.joker_timestop_available:
                 return JsonResponse({
                     'status': 'ERROR',
@@ -494,10 +505,9 @@ class QuizView(View):
                     })
 
         if action == 'nextQuestion':
-            quiz = self.get_current_quiz(quiz_id)
             quiz.helperdatetime = timezone.now()
             quiz.save()
-            question = self.get_current_question(quiz)
+            question = self.get_question(quiz)
             return JsonResponse({
                 'status': 'OK',
                 'question': {
@@ -518,12 +528,11 @@ class QuizView(View):
                         'status': 'ERROR', 
                         'message': 'No answer supplied in request. Please report this.'
                         })
-            quiz = self.get_current_quiz(quiz_id)
             if not quiz.timestop_active:
                 quiz.timestop_active = False
                 timedelta = timezone.now() - quiz.helperdatetime
                 quiz.duration += timedelta.seconds
-            question = self.get_current_question(quiz)
+            question = self.get_question(quiz)
             # update answer count
             chosen_answers_count = json.loads(question.chosen_answers_count)
             chosen_answers_count[answer] += 1
@@ -532,12 +541,12 @@ class QuizView(View):
             # check answer
             quiz.questions_index += 1
             if quiz.questions_index == quiz.questions_total:
-                quiz.active = False
+                quiz.quizstate = Quiz.FINISHED
                 quiz.enddatetime = timezone.now()
             if answer == question.correct_answer:
                 quiz.questions_answered += 1
             elif quiz.quiztype == Quiz.SPRINT:
-                quiz.active = False
+                quiz.quizstate = Quiz.FINISHED
                 quiz.enddatetime = timezone.now()
             quiz.save()
             rank = self.get_ranking(quiz)
@@ -546,20 +555,11 @@ class QuizView(View):
                 'timePassed': quiz.duration,
                 'correctAnswer': question.correct_answer,
                 'rank': rank,
-                'quizActive': quiz.active,
+                'quizActive': quiz.quizstate == Quiz.IN_PROGRESS,
                 'questionsIndex': quiz.questions_index,
                 'questionsAnswered': quiz.questions_answered,
                 'questionExplanation': question.explanation
                 })
-        if action == 'closeQuiz':
-            quiz = self.get_current_quiz(quiz_id)
-            quiz.enddatetime = timezone.now()
-            quiz.active = False
-            quiz.can_send_love = False
-            quiz.save()
-            return JsonResponse({
-                'status': 'OK'
-            })
         return JsonResponse({'status': 'ERROR', 'message': 'You reached a deep dark point where you should not be... There are dragons! Please report this.'})
 
 

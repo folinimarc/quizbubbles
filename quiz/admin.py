@@ -30,16 +30,15 @@ class QuestionAdmin(admin.ModelAdmin):
 
 @admin.register(Quiz)
 class QuizAdmin(admin.ModelAdmin):
-    readonly_fields = ('uuid',)
     list_select_related = ('bubble',)
-    list_display = ('id', 'username', 'quiztype', 'questions_total', 'active', 'duration', 'enddatetime', 'last_access','bubble')
-    search_fields = ('username', 'quiztype', 'questions_total', 'active', 'duration', 'enddatetime', 'last_access', 'bubble')
+    list_display = ('id', 'username', 'quiztype', 'questions_total', 'get_quizstate_display', 'duration', 'enddatetime', 'last_access','bubble')
+    search_fields = ('username', 'quiztype', 'questions_total', 'get_quizstate_display', 'duration', 'enddatetime', 'last_access', 'bubble')
 
 
 @admin.register(Bubble)
 class BubbleAdmin(admin.ModelAdmin):
     list_display = ('name', 'email', 'public', 'hearts', 'created', 'last_access')
-    readonly_fields = ('uuid', 'reset_token')
+    readonly_fields = ('reset_token',)
 
     def get_form(self, request, obj=None, **kwargs):
         form = super(BubbleAdmin, self).get_form(request, obj, **kwargs)
