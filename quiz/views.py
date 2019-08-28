@@ -424,11 +424,6 @@ class QuizView(View):
                 'message': 'No valid action was supplied. Please report this.'
                 })
         quiz = self.get_quiz(quiz_id)
-        if action == 'sendHeartbeat':
-            quiz.heartbeat_timestamp = timezone.now()
-            return JsonResponse({
-                'status': 'OK',
-                })
         if action == 'sendLove':
             if quiz.quiztype != Quiz.SPRINT or not quiz.can_send_love or quiz.questions_answered != quiz.questions_total:
                 return JsonResponse({
@@ -448,6 +443,12 @@ class QuizView(View):
             return JsonResponse({
                 'status': 'ERROR',
                 'message': f'This quiz is not active anymore. Please start a new quiz.'
+                })
+        if action == 'sendHeartbeat':
+            quiz.heartbeat_timestamp = timezone.now()
+            quiz.save()
+            return JsonResponse({
+                'status': 'OK',
                 })
         if action == 'getQuizData':
             rank = self.get_ranking(quiz)

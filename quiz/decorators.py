@@ -44,7 +44,7 @@ def check_quiz_permission(function=None):
                 quiz.quizstate = Quiz.IN_PROGRESS
                 quiz.save()
                 return function(request, *args, **kwargs)
-            elif request.method == 'POST' and quiz.quizstate == Quiz.IN_PROGRESS:
+            elif request.method == 'POST':
                 return function(request, *args, **kwargs)
             messages.info(request, f'This quiz is not active anymore! This might be the case if you closed or reloaded the browser window.')
             return redirect('home', bubble_name=bubble.name)

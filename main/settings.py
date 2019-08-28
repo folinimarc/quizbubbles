@@ -77,11 +77,6 @@ NR_LEADERBOARD_ENTRIES_TO_SHOW = 10
 # crispy forms template pack
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
-# cron jobs
-CRONJOBS = [
-    ('*/5 * * * *', 'quiz.cron.cron_clean_active_games')
-]
-
 if eval(os.environ.get('LOAD_PROD_SETTINGS', 'False')):
     from .settings_production import *
 else:

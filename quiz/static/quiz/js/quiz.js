@@ -60,7 +60,9 @@ var app = new Vue({
     }.bind(this), 1000);
     // periodically send heartbeat
     setInterval(function() {
-      this.ajaxPost({'action':'sendHeartbeat'}, function() {});
+      if (this.quizActive) {
+        this.ajaxPost({'action':'sendHeartbeat'}, function() {});
+      }
     }.bind(this), 10000);
   },
   computed: {
@@ -260,8 +262,7 @@ var app = new Vue({
     },
     ajaxPost: function(data, successCallback, url='') {
       this.loading = true;
-      axios.post(url, data)
-      .then(function(response) {
+      axios.post(url, data).then(function(response) {
           this.loading = false;
           if (response.data.status === 'ERROR') {
             this.handleError(response.data.message);

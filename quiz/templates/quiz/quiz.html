@@ -106,7 +106,7 @@
                                         <a @click.stop="" href="{% url 'home' bubble_name=bubble_name %}" class="btn btn-outline-light white-outline">Leave</a>
                                     </div>
                                     <h5 class="m-0 mt-2 mb-3">You achieved rank [[rank]] out of [[quizesTotal]] with [[questionsAnswered]] out of [[questionsTotal]] questions correctly answered in [[formattedTime()]]!</h5>
-                                    <p v-if="showHeart" class="m-0 mb-2 d-flex align-items-center">Liked this quiz? Feel free to share some love by clicking the heart <i @click.prevent.stop="sendLove();" class="ml-2 medium-icon material-icons">[[heartIcon]]</i></p>
+                                    <p v-if="showHeart" class="m-0 mb-2 d-flex align-items-center">Liked this quiz? Feel free to share some love by clicking the heart <i @click.prevent.stop="sendLove();" class="ml-2 medium-icon material-icons cursor-pointer">[[heartIcon]]</i></p>
                                 </template>
                             </div>
                         </div>
