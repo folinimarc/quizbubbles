@@ -20,6 +20,9 @@ $(document).ready(function() {
             setTimeout(function() {
                 document.getElementById('spinner').className = 'd-none';
             }, 1000);
+            //hide pagination if there is just one page
+            var pagination = $(this).closest('.dataTables_wrapper').find('.dataTables_paginate');
+            pagination.toggle(this.api().page.info().pages > 0);
         },
         columnDefs: [
         {   targets: 1,
