@@ -10,7 +10,7 @@ class QuestionAdmin(admin.ModelAdmin):
     }
     list_select_related = ('bubble',)
     list_display = ('pk', 'trimmed_question', 'difficulty', 'contributor', 'bubble')
-    search_fields = ('pk', 'trimmed_question', 'difficulty', 'contributor', 'bubble')
+    search_fields = ('pk', 'question', 'answer_a', 'answer_b', 'answer_c', 'answer_d', 'explanation', 'difficulty', 'contributor', 'bubble__name')
 
     fieldsets = (
         ('Define question and answers', {
@@ -31,8 +31,8 @@ class QuestionAdmin(admin.ModelAdmin):
 @admin.register(Quiz)
 class QuizAdmin(admin.ModelAdmin):
     list_select_related = ('bubble',)
-    list_display = ('id', 'username', 'quiztype', 'questions_total', 'get_quizstate_display', 'duration', 'enddatetime', 'last_access','bubble')
-    search_fields = ('username', 'quiztype', 'questions_total', 'get_quizstate_display', 'duration', 'enddatetime', 'last_access', 'bubble')
+    list_display = ('id', 'username', 'quiztype', 'questions_total', 'quizstate', 'duration', 'enddatetime', 'last_access','bubble')
+    search_fields = ('username', 'quiztype', 'questions_total', 'quizstate', 'duration', 'enddatetime', 'last_access', 'bubble__name')
 
 
 @admin.register(Bubble)
