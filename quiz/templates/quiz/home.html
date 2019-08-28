@@ -57,7 +57,7 @@
                             <p class="mb-0">{{diff.difficulty}}:  <span class="{% if diff.missing %}text-warning{% else %}text-success{% endif %}">{{diff.count}}/{{diff.max}}</span></p>
                             {% endfor %}
                         {% else %}
-                        <p class="text-light">{{nr_sprint_questions}} questions in ascending difficulty. One wrong answer and you are out!</p>
+                        <p class="text-light">{{nr_sprint_questions}} questions, ascending difficulty, one wrong answer and you are out!</p>
                         <div class="form-group">
                             <div class="input-group">
                                 <input class="form-control" name="username-sprint" placeholder="Name" type="text" value="{{username}}"" onfocus="var temp_value=this.value; this.value=''; this.value=temp_value">
@@ -85,7 +85,7 @@
                         {% if nr_questions < 1 %}
                         <p class="m-0">You need to add at least one question before playing this mode...</p>
                         {% else %}
-                        <p class="text-light">All {{nr_questions}} questions in random order. Get as many correct as possible. Good luck!</p>
+                        <p class="text-light">All {{nr_questions}} questions, random order, get as many correct as possible. Good luck!</p>
                         <div class="form-group">
                             <div class="input-group">
                                 <input class="form-control" name="username-marathon" placeholder="Name" type="text" value="{{username}}" onfocus="var temp_value=this.value; this.value=''; this.value=temp_value">
