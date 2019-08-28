@@ -93,7 +93,8 @@ class Login(View):
                     name = create_form.cleaned_data['name'],
                     email = create_form.cleaned_data['email'],
                     password = make_password(create_form.cleaned_data['password1']),
-                    public = create_form.cleaned_data['public']
+                    public = create_form.cleaned_data['public'],
+                    last_cleanup = timezone.now()
                 )
                 messages.info(request, f'New quizebubble \"{create_form.cleaned_data["name"]}\" successfully created. Have fun!')
                 request.session[bubble.name] = str(bubble.id)
