@@ -46,6 +46,8 @@ def check_quiz_permission(function=None):
                 return function(request, *args, **kwargs)
             elif request.method == 'POST' and quiz.quizstate == Quiz.IN_PROGRESS:
                 return function(request, *args, **kwargs)
+            messages.info(request, f'This quiz is not active anymore! This might be the case if you closed or reloaded the browser window.')
+            return redirect('home', bubble_name=bubble.name)
         messages.info(request, f'You tried to access a ressource without the necessary permissions. Please log in!')
         return redirect('login')
     return wrapper

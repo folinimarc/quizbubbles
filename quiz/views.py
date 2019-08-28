@@ -532,9 +532,10 @@ class QuizView(View):
                         'message': 'No answer supplied in request. Please report this.'
                         })
             if not quiz.timestop_active:
-                quiz.timestop_active = False
                 timedelta = timezone.now() - quiz.helperdatetime
                 quiz.duration += timedelta.seconds
+            else:
+                quiz.timestop_active = False
             question = self.get_question(quiz)
             # update answer count
             chosen_answers_count = json.loads(question.chosen_answers_count)
