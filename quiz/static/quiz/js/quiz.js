@@ -149,6 +149,7 @@ var app = new Vue({
       this.question = Object.assign(this.question, data['question']);
       this.hiddenAnswers = ['a', 'b', 'c', 'd'];
       this.flipShowQuestion = true;
+      this.startTimer();
       setTimeout(function() {
         this.answers = {}
         Object.keys(data['answers']).forEach(function(key) {
@@ -158,7 +159,6 @@ var app = new Vue({
         this.awaitingAnswer = true;
         this.chosenAnswer = null;
         this.correctAnswer = null;
-        this.startTimer();
       }.bind(this), 1000)
     },
     getQuizData: function() {
