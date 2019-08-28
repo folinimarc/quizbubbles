@@ -60,7 +60,7 @@ var app = new Vue({
     }.bind(this), 1000);
     // periodically send heartbeat
     setInterval(function() {
-      if (this.quizActive) {
+      if (this.quizStarted && this.quizActive) {
         this.ajaxPost({'action':'sendHeartbeat'}, function() {});
       }
     }.bind(this), 10000);
@@ -258,6 +258,7 @@ var app = new Vue({
       this.loading = false;
       this.awaitingAnswer = true;
       this.flipShowQuestion = false;
+      this.quizActive = false;
       this.addMessage(errorMsg);
     },
     ajaxPost: function(data, successCallback, url='') {

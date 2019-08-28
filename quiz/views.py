@@ -439,16 +439,16 @@ class QuizView(View):
                     'status': 'OK',
                     'message': 'You added a heart to the quizbubble.'
             })
-        if quiz.quizstate != Quiz.IN_PROGRESS:
-            return JsonResponse({
-                'status': 'ERROR',
-                'message': f'This quiz is not active anymore. Please start a new quiz.'
-                })
         if action == 'sendHeartbeat':
             quiz.heartbeat_timestamp = timezone.now()
             quiz.save()
             return JsonResponse({
                 'status': 'OK',
+                })
+        if quiz.quizstate != Quiz.IN_PROGRESS:
+            return JsonResponse({
+                'status': 'ERROR',
+                'message': f'This quiz is not active anymore. Please start a new quiz.'
                 })
         if action == 'getQuizData':
             rank = self.get_ranking(quiz)
