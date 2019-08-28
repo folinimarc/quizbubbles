@@ -31,8 +31,8 @@ class QuestionAdmin(admin.ModelAdmin):
 @admin.register(Quiz)
 class QuizAdmin(admin.ModelAdmin):
     list_select_related = ('bubble',)
-    list_display = ('id', 'username', 'quiztype', 'questions_total', 'quizstate', 'duration', 'enddatetime', 'last_access','bubble')
-    search_fields = ('username', 'quiztype', 'questions_total', 'quizstate', 'duration', 'enddatetime', 'last_access', 'bubble__name')
+    list_display = ('id', 'username', 'quiztype', 'questions_total', 'questions_answered','quizstate', 'duration', 'enddatetime', 'last_access','bubble')
+    search_fields = ('username', 'quiztype', 'questions_total', 'questions_answered', 'quizstate', 'duration', 'enddatetime', 'last_access', 'bubble__name')
 
 
 @admin.register(Bubble)
