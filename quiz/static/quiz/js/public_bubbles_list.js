@@ -9,6 +9,6 @@ $(document).ready(function() {
         stateDuration: -1,
         initComplete: function(settings, json) {
             document.getElementById('loading-container').classList.remove('opacity-zero'); 
-          }
+        },
     });
 });
