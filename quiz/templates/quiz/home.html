@@ -57,7 +57,7 @@
                             <p class="mb-0">{{diff.difficulty}}:  <span class="{% if diff.missing %}text-warning{% else %}text-success{% endif %}">{{diff.count}}/{{diff.max}}</span></p>
                             {% endfor %}
                         {% else %}
-                        <p class="text-light">{{nr_sprint_questions}} questions in ascending difficulty. Beware: One wrong answer and you are out!</p>
+                        <p class="text-light">{{nr_sprint_questions}} questions in ascending difficulty. One wrong answer and you are out!</p>
                         <div class="form-group">
                             <div class="input-group">
                                 <input class="form-control" name="username-sprint" placeholder="Name" type="text" value="{{username}}"" onfocus="var temp_value=this.value; this.value=''; this.value=temp_value">
