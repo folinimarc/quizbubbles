@@ -476,7 +476,7 @@ class QuizView(View):
             quiz.save()
             return JsonResponse({
                     'status': 'OK',
-                    'message': 'Timestopper joker: Timer reset and stopped.',
+                    'message': 'Timestop joker: Timer reset and stopped.',
                     'timePassed': quiz.duration
                     })
 
