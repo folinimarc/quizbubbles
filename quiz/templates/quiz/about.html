@@ -1,0 +1,40 @@
+{% extends 'quiz/base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+{% load crispy_forms_field %}
+
+{% block css %}
+{% endblock %}
+
+
+{% block js %}
+{% endblock %}
+
+
+{% block content %}
+<!-- nav -->
+<div class="nav-row row my-4">
+    <div class="col-12">
+        <a href="{% url 'login' %}" class="btn btn-outline-secondary mr-2">Back to login</a>
+    </div>
+</div>
+<!-- body -->
+    <div class="row mt-3">
+        <div class="col-12">
+            <div class="text-light text-center p-4 d-flex flex-column justify-content-center align-items-center">
+                <h2 class="display-4 mb-3">About QuizBubbles</h2>
+                {% if captcha_form %}
+                <form class="hide-labels smaller-controls" method="post">
+                    {% csrf_token %}
+                    {{captcha_form|crispy}}
+                    <button type="submit" class="btn btn-outline-primary white-outline">Show information</button>
+                </form>
+                {% else %}
+                <p>QuizBubbles was created by Marc Folini, 2019.</p>
+                <p>Feel free to contact me: marc.folini@gmx.ch</p>
+                <p>This website uses cookies on a per session base only and does not track user behavior, nor does it in any way collect user related data.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

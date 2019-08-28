@@ -71,12 +71,20 @@
         </div>
     </div>
 </div>
-<div id="loading-container" class="row my-5 opacity-zero opacity-fade">
+<div id="loading-container" class="row mt-5 opacity-zero opacity-fade">
     <!-- public quizes list -->
     <div class="col-12">
         <h1 class="mb-2 display-4 text-light text-center border-bottom border-light">Public bubbles</h1>
         <h4 class="mb-4 display-5 text-light text-center">Can you beat them all?</h4>
         {% include 'quiz/includes/public_bubbles_list.html' %}
+    </div>
+</div>
+<!-- info -->
+<div class="row my-3">
+    <div class="col-12">
+        <small>
+            <a class="text-light" href="{% url 'about' %}">About QuizBubbles</a>
+        </small>
     </div>
 </div>
 

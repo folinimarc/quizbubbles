@@ -21,6 +21,19 @@ from .forms import *
 from collections import OrderedDict
 
 
+class About(View):
+    def get(self, request):
+        ctx = {}
+        ctx['captcha_form'] = CaptchaForm()
+        return render(request, 'quiz/about.html', ctx)
+
+    def post(self, request):
+        ctx = {}
+        captcha_form = CaptchaForm(request.POST)
+        if not captcha_form.is_valid():
+            ctx['captcha_form'] = captcha_form
+        return render(request, 'quiz/about.html', ctx)
+        
 
 class Login(View):
 
