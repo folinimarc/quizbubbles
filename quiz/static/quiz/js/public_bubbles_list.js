@@ -7,8 +7,8 @@ $(document).ready(function() {
         responsive: true,
         stateSave: true,
         stateDuration: -1,
-        "fnDrawCallback": function( oSettings ) {
-            document.getElementById('loading-container').classList.remove('opacity-zero');            
-        },
+        initComplete: function(settings, json) {
+            document.getElementById('loading-container').classList.remove('opacity-zero'); 
+          }
     });
 });
