@@ -281,7 +281,7 @@ class Home(View):
         ctx['username'] = request.session.get('username', '')
         bubble = Bubble.objects.get(name=bubble_name)
         time_since_cleanup = timezone.now() - bubble.last_cleanup
-        if time_since_cleanup.seconds > 360:
+        if time_since_cleanup.seconds > 3600:
             time_treshold = timezone.now() - timedelta(minutes=1)
             a = Quiz.objects.filter(bubble_id=bubble.id, heartbeat_timestamp__lt=time_treshold).update(
                 quizstate=Quiz.FINISHED,
