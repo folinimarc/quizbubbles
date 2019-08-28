@@ -85,12 +85,13 @@ class BubbleCreateForm(forms.ModelForm):
 
 class BubbleChangeForm(BubbleCreateForm):
 
+    password2 = forms.CharField(max_length=20, help_text='Leave both blank to keep old password.', widget=forms.PasswordInput(attrs={'placeholder': 'Repeat Password'}))
+    
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['password1'].required = False
         self.fields['password2'].required = False
-
-    password2 = forms.CharField(max_length=20, help_text='Leave both blank to keep old password.', widget=forms.PasswordInput(attrs={'placeholder': 'Repeat Password'}))
+        self.fields['captcha'].required = False
 
 
 class BubbleDeleteForm(forms.Form):
