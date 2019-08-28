@@ -54,16 +54,14 @@ class BubbleJoinForm(forms.ModelForm):
         self.fields['password'].required = False
 
 
-class BubbleCreateForm(forms.ModelForm):
-    
-    password1 = forms.CharField(max_length=20, widget=forms.PasswordInput(attrs={'placeholder': 'Password'}))
-    password2 = forms.CharField(max_length=20, widget=forms.PasswordInput(attrs={'placeholder': 'Repeat password'}))
-    captcha = ReCaptchaField(widget=ReCaptchaV2Checkbox(api_params={'onload': 'adjustHeight'}))
+class BubbleChangeForm(forms.ModelForm):
 
-    prefix='create'
+    password1 = forms.CharField(max_length=20, required=False, widget=forms.PasswordInput(attrs={'placeholder': 'Password'}))
+    password2 = forms.CharField(max_length=20, required=False, help_text='Leave both blank to keep old password.', widget=forms.PasswordInput(attrs={'placeholder': 'Repeat Password'}))
+
     class Meta:
         model = Bubble
-        fields = ('name', 'email', 'password1', 'password2', 'public', 'captcha')
+        fields = ('name', 'email', 'password1', 'password2', 'public')
         widgets = {
             'name': forms.TextInput(attrs={'placeholder': 'Bubblename'}),
             'email': forms.TextInput(attrs={'placeholder': 'Email (public)'}),
@@ -73,25 +71,34 @@ class BubbleCreateForm(forms.ModelForm):
         }
 
     def clean(self):
-        cleaned_data = super(BubbleCreateForm, self).clean()
+        cleaned_data = super(BubbleChangeForm, self).clean()
         password1 = cleaned_data.get('password1')
         password2 = cleaned_data.get('password2')
         if password1 != password2:
             self.add_error('password2', 'Passwords did not match.')
+        return cleaned_data
+
+
+class BubbleCreateForm(BubbleChangeForm):
+    
+    password2 = forms.CharField(max_length=20, widget=forms.PasswordInput(attrs={'placeholder': 'Repeat password'}))
+    captcha = ReCaptchaField(widget=ReCaptchaV2Checkbox(api_params={'onload': 'adjustHeight'}))
+
+    prefix='create'
+    class Meta(BubbleChangeForm.Meta):
+        fields = ('name', 'email', 'password1', 'password2', 'public', 'captcha')
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['password1'].required = True
+        self.fields['password2'].required = True
+
+    def clean(self):
+        cleaned_data = super(BubbleCreateForm, self).clean()
         bubble = Bubble.objects.filter(name=cleaned_data.get('name', None))
         if bubble and bubble[0].uuid != self.instance.uuid:
             self.add_error('name', 'Name already in use')
-
-
-class BubbleChangeForm(BubbleCreateForm):
-
-    password2 = forms.CharField(max_length=20, help_text='Leave both blank to keep old password.', widget=forms.PasswordInput(attrs={'placeholder': 'Repeat Password'}))
-    
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['password1'].required = False
-        self.fields['password2'].required = False
-        self.fields['captcha'].required = False
+        return cleaned_data
 
 
 class BubbleDeleteForm(forms.Form):
