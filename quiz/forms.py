@@ -123,5 +123,5 @@ class BubblePasswordResetForm(forms.Form):
             self.add_error('password2', 'Passwords did not match.')
 
 
-class BubblePasswordRequestForm(forms.Form):
+class CaptchaForm(forms.Form):
     captcha = ReCaptchaField()

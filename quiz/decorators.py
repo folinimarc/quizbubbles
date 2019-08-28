@@ -43,3 +43,12 @@ def check_quiz_permission(function=None):
         messages.info(request, f'You tried to access a ressource without the necessary permissions. Please log in!')
         return redirect('login')
     return wrapper
+
+
+def human_confirmed(function=None):
+    def wrapper(request, *args, **kwargs):
+        if request.session.get('human_confirmed', False):
+            return function(request, *args, **kwargs)
+        messages.info(request, f'You tried to access a ressource without the necessary permissions. Please log in!')
+        return redirect('login')
+    return wrapper

@@ -3,7 +3,7 @@ from .views import *
 
 urlpatterns = [
     path('', Login.as_view(), name='login'),
-    path('passwordreset/<str:token>', PasswordReset.as_view(), name='password_reset'),
+    path('resetpassword/<str:token>', PasswordReset.as_view(), name='reset_password'),
     path('<slug:bubble_name>/forgotpassword', ForgotPassword.as_view(), name='forgot_password'),
     path('<slug:bubble_name>/requestpassword', RequestPassword.as_view(), name='request_password'),
     path('<slug:bubble_name>/logout', Logout.as_view(), name='logout'),

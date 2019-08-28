@@ -105,24 +105,30 @@ class ForgotPassword(View):
     def get(self, request, bubble_name):
         ctx = {}
         ctx['bubble'] = get_object_or_404(Bubble, name=bubble_name)
+        ctx['captcha_form'] = CaptchaForm()
         return render(request, 'quiz/forgot_password.html', ctx)
 
+    def post(self, request, bubble_name):
+        ctx = {}
+        captcha_form = CaptchaForm(request.POST)
+        if not captcha_form.is_valid():
+            ctx['bubble'] = get_object_or_404(Bubble, name=bubble_name)
+            ctx['captcha_form'] = captcha_form
+            return render(request, 'quiz/forgot_password.html', ctx)
+        request.session['human_confirmed'] = True
+        return redirect('request_password', bubble_name=bubble_name)
 
+
+@method_decorator([human_confirmed], name='dispatch')
 class RequestPassword(View):
     def get(self, request, bubble_name):
         ctx = {}
         ctx['bubble'] = get_object_or_404(Bubble, name=bubble_name)
-        ctx['request_form'] = BubblePasswordRequestForm()
         return render(request, 'quiz/request_password.html', ctx)
 
     @transaction.atomic
     def post(self, request, bubble_name):
         ctx = {}
-        request_form = BubblePasswordRequestForm(request.POST)
-        if not request_form.is_valid():
-            ctx['bubble'] = get_object_or_404(Bubble, name=bubble_name)
-            ctx['request_form'] = request_form
-            return render(request, 'quiz/request_password.html', ctx)
         bubble = get_object_or_404(Bubble, name=bubble_name)
         timestamp = str(int(time.time()))
         token = Signer().sign('-'.join([timestamp, bubble.name]))
@@ -130,7 +136,7 @@ class RequestPassword(View):
         bubble.save()
         formatted_time_now = timezone.now().strftime('%Y-%m-%d %H:%M:%S')
         subject = f'Password reset request of quizbubble {bubble.name} on {formatted_time_now} UTC'
-        reset_link = request.build_absolute_uri(reverse('password_reset', kwargs={'token': token}))
+        reset_link = request.build_absolute_uri(reverse('reset_password', kwargs={'token': token}))
         body = f'The following link will be valid for one hour to reset your password of bubble {bubble.name}:\n\n{reset_link}\n\nKind regards from the quizbubbles team'
         send_mail(
             subject,
@@ -160,7 +166,7 @@ class PasswordReset(View):
             return redirect('login')
         ctx['bubble_name'] = bubble_name
         ctx['reset_form'] = BubblePasswordResetForm()
-        return render(request, 'quiz/password_reset.html', ctx)
+        return render(request, 'quiz/reset_password.html', ctx)
 
     @transaction.atomic
     def post(self, request, token):
@@ -180,7 +186,7 @@ class PasswordReset(View):
         reset_form = BubblePasswordResetForm(request.POST)
         if not reset_form.is_valid():
             ctx['reset_form'] = reset_form
-            return render(request, 'quiz/password_reset.html', ctx)
+            return render(request, 'quiz/reset_password.html', ctx)
         bubble.password = make_password(reset_form.cleaned_data['password1'])
         bubble.reset_token = None
         bubble.save()

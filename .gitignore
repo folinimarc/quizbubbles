@@ -2,5 +2,9 @@ conf/
 .vscode/
 mail/
 
-db.sqlite3
+*.sqlite3
 *.pyc
+quiz/__pycache__/*.pyc
+main/__pycache__/*.pyc
+quiz/migrations/__pycache__/*.pyc
+quiz/templatetags/__pycache__/*.pyc
