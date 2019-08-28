@@ -98,6 +98,7 @@ class Bubble(models.Model):
     password = models.TextField()
     created = models.DateTimeField(auto_now_add=True)
     last_access = models.DateTimeField(auto_now=True)
+    last_contribution = models.DateTimeField(null=True, blank=True)
     public = models.BooleanField(default=False)
     reset_token = models.TextField(null=True, blank=True)
     hearts = models.IntegerField(default=0)

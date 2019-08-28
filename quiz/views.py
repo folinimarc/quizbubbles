@@ -283,7 +283,7 @@ class Home(View):
         time_since_cleanup = timezone.now() - bubble.last_cleanup
         if time_since_cleanup.seconds > 3600:
             time_treshold = timezone.now() - timedelta(minutes=1)
-            a = Quiz.objects.filter(bubble_id=bubble.id, heartbeat_timestamp__lt=time_treshold).update(
+            Quiz.objects.filter(bubble_id=bubble.id, heartbeat_timestamp__lt=time_treshold).update(
                 quizstate=Quiz.FINISHED,
                 enddatetime=F('heartbeat_timestamp') + timedelta(seconds=10)
                 )
@@ -381,6 +381,8 @@ class NewQuestion(View):
                 bubble_id=bubble.id
             )
             request.session['username'] = form.cleaned_data['contributor']
+            bubble.last_contribution = timezone.now()
+            bubble.save()
             messages.info(request, 'Thank you! Your question was added.')
             return redirect('new_question', bubble_name=bubble_name)
         else:
@@ -590,6 +592,7 @@ class EditQuestion(View):
     def post(self, request, bubble_name, question_id):
         ctx = {}
         ctx['bubble_name'] = bubble_name
+        bubble = Bubble.objects.get(name=bubble_name)
         question = Question.objects.get(id=question_id)
         if 'delete' in request.POST:
             question.delete()
@@ -601,6 +604,8 @@ class EditQuestion(View):
             ctx['form'] = form
             return render(request, 'quiz/edit_question.html', ctx)
         form.save()
+        bubble.last_contribution = timezone.now()
+        bubble.save()
         messages.info(request, f'Question {question_id} successfully edited!')
         return redirect('question_list', bubble_name=bubble_name)
 

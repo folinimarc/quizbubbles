@@ -37,7 +37,7 @@ class QuizAdmin(admin.ModelAdmin):
 
 @admin.register(Bubble)
 class BubbleAdmin(admin.ModelAdmin):
-    list_display = ('name', 'email', 'public', 'hearts', 'created', 'last_access')
+    list_display = ('name', 'email', 'public', 'hearts', 'created', 'last_contribution', 'last_access')
     readonly_fields = ('reset_token',)
 
     def get_form(self, request, obj=None, **kwargs):
