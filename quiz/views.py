@@ -351,7 +351,8 @@ class Home(View):
             **form.cleaned_data, 
             questions_total=questions_total,
             question_ids=question_ids,
-            bubble_id=bubble.id
+            bubble_id=bubble.id,
+            heartbeat_timestamp=timezone.now()
             )
         request.session['session_quiz_id'] = str(quiz.id)
         request.session['username'] = form.cleaned_data['username']
