@@ -51,7 +51,7 @@
                         <td>{{question.question}}</td>
                         <td>{{question.get_difficulty_display}}</td>
                         <td>{{question.contributor}}</td>
-                        <td>{{question.created|date:"d.m.y"}}</td>
+                        <td data-order="{{question.created|date:'y.m.d'}}">{{question.created|date:"d.m.y"}}</td>
                     </tr>
                     {% endfor %}
                 </tbody>

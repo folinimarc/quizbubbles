@@ -17,9 +17,9 @@
             <td>{{bubble.questions_total}}</td>
             <td>{{bubble.quizes_total}}</td>
             <td>{{bubble.hearts}}</td>
-            <td>{{bubble.created|date:"d.m.y"}}</td>
-            <td>{{bubble.last_contribution|date:"d.m.y"}}</td>
-            <td>{{bubble.last_access|date:"d.m.y"}}</td>
+            <td data-order="{{bubble.created|date:'y.m.d'}}">{{bubble.created|date:"d.m.y"}}</td>
+            <td data-order="{{bubble.last_contribution|date:'y.m.d'}}">{{bubble.last_contribution|date:"d.m.y"}}</td>
+            <td data-order="{{bubble.last_access|date:'y.m.d'}}">{{bubble.last_access|date:"d.m.y"}}</td>
         </tr>
         {% endfor %}
     </tbody>
