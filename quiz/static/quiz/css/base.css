@@ -142,3 +142,8 @@ a {
     font-weight: lighter !important;
     color: yellow;
 }
+
+.dataTables_filter input {
+    background-color: inherit;
+    color: white;
+}

@@ -10,19 +10,30 @@ $(document).ready(function() {
 
     // init datatable
     $('#table').DataTable( {
+        dom: 'frtip',
         responsive: true,
         stateSave: true,
         stateDuration: -1,
-        "fnDrawCallback": function( oSettings ) {
-            // hide spinner when table is completely loaded
-            document.getElementById('main-container').classList.remove('opacity-zero');
-            document.getElementById('spinner').classList.add('opacity-zero');
-            setTimeout(function() {
-                document.getElementById('spinner').className = 'd-none';
-            }, 1000);
+        pageLength: 25,
+        bLengthChange: false,
+        initComplete: function(settings, json) {
+            document.getElementById('loading-container').classList.remove('opacity-zero');
+        },
+        fnDrawCallback: function( oSettings ) {
             //hide pagination if there is just one page
             var pagination = $(this).closest('.dataTables_wrapper').find('.dataTables_paginate');
-            pagination.toggle(this.api().page.info().pages > 0);
+            pagination.toggle(this.api().page.info().pages > 1);
+            // add classes to search and length elements to left align on mobile
+            $(this).closest('.dataTables_wrapper').find('.dataTables_filter').addClass('text-left');
+            //$(this).closest('.dataTables_wrapper').find('.dataTables_length').addClass('text-left text-md-left');
+            /*
+            // hide filter
+            var filter = $(this).closest('.dataTables_wrapper').find('.dataTables_filter');
+            filter.toggle(this.api().page.info().pages > 1);
+            // hide nr entries
+            var length = $(this).closest('.dataTables_wrapper').find('.dataTables_length');
+            length.toggle(this.api().page.info().pages > 1);
+            */
         },
         columnDefs: [
         {   targets: 1,
