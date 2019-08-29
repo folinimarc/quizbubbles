@@ -15,7 +15,7 @@
 <!-- nav -->
 <div class="nav-row row my-4">
     <div class="col-12">
-        <a href="{% url 'login' %}" class="btn btn-outline-secondary mr-2">Back to login</a>
+        <a href="{% url 'login' %}" class="btn btn-outline-light mr-2">Back</a>
     </div>
 </div>
 <!-- body -->
@@ -27,7 +27,7 @@
                 <form class="hide-labels smaller-controls" method="post">
                     {% csrf_token %}
                     {{captcha_form|crispy}}
-                    <button type="submit" class="btn btn-outline-primary white-outline">Show information</button>
+                    <button type="submit" class="btn btn-outline-light white-outline">Show information</button>
                 </form>
                 {% else %}
                 <p>QuizBubbles was created by Marc Folini, 2019.</p>

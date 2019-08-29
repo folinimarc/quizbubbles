@@ -48,7 +48,7 @@
                                 <button type="submit" name="join" class="btn btn-primary btn-block">Join</button>
                             </div>
                             {% if wrong_password %}
-                            <a href="{% url 'forgot_password' bubble_name=bubble_name %}" class="text-light mt-2 p-1"><small>Forgot password?</small></a>
+                            <a class="btn-mini btn btn-outline-light mt-4 w-100" href="{% url 'forgot_password' bubble_name=bubble_name %}">Forgot password?</a>
                             {% endif %}
                         </div>
                     </form>
@@ -84,7 +84,7 @@
 <div class="row my-3">
     <div class="col-12">
         <small>
-            <a class="text-light" href="{% url 'about' %}">About QuizBubbles</a>
+            <a class="btn-mini btn btn-outline-light" href="{% url 'about' %}">About QuizBubbles</a>
         </small>
     </div>
 </div>

@@ -30,7 +30,7 @@ $(document).ready(function() {
                 if (document.getElementById('check-full-question').checked) {
                     return data;
                 } else {
-                    return data.substring(0,10) + '...';
+                    return data.substring(0,15) + '...';
                 }
             }
         }]
