@@ -143,7 +143,21 @@ a {
     color: yellow;
 }
 
-.dataTables_filter input {
+.dataTables_filter input[type="search"] {
     background-color: inherit;
     color: white;
+    margin-left: 0px !important;
 }
+
+.dataTables_filter input::-webkit-input-placeholder {
+    color: white;
+  }
+  .dataTables_filter input::-moz-placeholder {
+    color: white;
+  }
+  .dataTables_filter input:-ms-input-placeholder {
+    color: white;
+  }
+  .dataTables_filter input::placeholder {
+    color: white;
+  }
