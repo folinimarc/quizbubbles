@@ -13,7 +13,7 @@
     <tbody>
         {% for bubble in bubbles %}
         <tr>
-            <td><a class="text-white border-bottom border-light" href="{% url 'home' bubble_name=bubble.name %}">{{bubble.name}}</a></td>
+            <td data-order="{{bubble.name}}"><a class="text-white border-bottom border-light" href="{% url 'home' bubble_name=bubble.name %}">{{bubble.name}}</a></td>
             <td>{{bubble.questions_total}}</td>
             <td>{{bubble.quizes_total}}</td>
             <td>{{bubble.hearts}}</td>
