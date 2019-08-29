@@ -45,8 +45,8 @@ class BubbleJoinForm(forms.ModelForm):
         model = Bubble
         fields = ('name', 'password')
         widgets = {
-            'name': forms.TextInput(attrs={'placeholder': 'Bubblename', 'autofocus': 'autofocus'}),
-            'password': forms.PasswordInput(attrs={'placeholder': 'Password'}),
+            'name': forms.TextInput(attrs={'placeholder': 'Bubblename', 'autofocus': 'autofocus', 'autocomplete': 'off'}),
+            'password': forms.PasswordInput(attrs={'placeholder': 'Password', 'autocomplete': 'new-password'}),
             }
 
     def __init__(self, *args, **kwargs):
@@ -56,15 +56,15 @@ class BubbleJoinForm(forms.ModelForm):
 
 class BubbleChangeForm(forms.ModelForm):
 
-    password1 = forms.CharField(max_length=20, required=False, widget=forms.PasswordInput(attrs={'placeholder': 'Password'}))
-    password2 = forms.CharField(max_length=20, required=False, help_text='Leave both blank to keep old password.', widget=forms.PasswordInput(attrs={'placeholder': 'Repeat Password'}))
+    password1 = forms.CharField(max_length=20, required=False, widget=forms.PasswordInput(attrs={'placeholder': 'Password', 'autocomplete': 'new-password'}))
+    password2 = forms.CharField(max_length=20, required=False, help_text='Leave both blank to keep old password.', widget=forms.PasswordInput(attrs={'placeholder': 'Repeat Password', 'autocomplete': 'new-password'}))
 
     class Meta:
         model = Bubble
         fields = ('name', 'email', 'password1', 'password2', 'public')
         widgets = {
-            'name': forms.TextInput(attrs={'placeholder': 'Bubblename'}),
-            'email': forms.TextInput(attrs={'placeholder': 'Email (public)'}),
+            'name': forms.TextInput(attrs={'placeholder': 'Bubblename', 'autocomplete': 'off'}),
+            'email': forms.TextInput(attrs={'placeholder': 'Email (public)', 'autocomplete': 'off'}),
             }
         labels = {
             'public': 'Public QuizBubble'
@@ -81,7 +81,7 @@ class BubbleChangeForm(forms.ModelForm):
 
 class BubbleCreateForm(BubbleChangeForm):
     
-    password2 = forms.CharField(max_length=20, widget=forms.PasswordInput(attrs={'placeholder': 'Repeat password'}))
+    password2 = forms.CharField(max_length=20, widget=forms.PasswordInput(attrs={'placeholder': 'Repeat password', 'autocomplete': 'new-password'}))
     captcha = ReCaptchaField(widget=ReCaptchaV2Checkbox(api_params={'onload': 'adjustHeight'}))
 
     prefix='create'
