@@ -2,6 +2,7 @@ from django.contrib import admin
 from .models import *
 from django.forms import widgets
 from django.contrib.auth.hashers import make_password
+from django.db.models import Count
 
 @admin.register(Question)
 class QuestionAdmin(admin.ModelAdmin):
@@ -37,9 +38,14 @@ class QuizAdmin(admin.ModelAdmin):
 
 @admin.register(Bubble)
 class BubbleAdmin(admin.ModelAdmin):
-    list_display = ('name', 'email', 'public', 'hearts', 'nr_questions', 'nr_quizes', 'created', 'last_contribution', 'last_access')
-    readonly_fields = ('reset_token',)
-    search_fields = ('name', 'email', 'public', 'hearts', 'created', 'last_contribution', 'last_access')
+
+    def get_queryset(self, request):
+        queryset = super().get_queryset(request)
+        queryset = queryset.annotate(
+            _nr_questions=Count('questions', distinct=True),
+            _nr_quizes=Count('quizes', distinct=True),
+        )
+        return queryset
 
     def nr_questions(self, obj):
         return obj.questions.count()
@@ -57,3 +63,10 @@ class BubbleAdmin(admin.ModelAdmin):
             obj.password = make_password(form.cleaned_data['password'])
             obj.save()
         return super(BubbleAdmin, self).save_model(request, obj, form, change)
+
+    list_display = ('name', 'email', 'public', 'hearts', 'nr_questions', 'nr_quizes', 'created', 'last_contribution', 'last_access')
+    readonly_fields = ('reset_token',)
+    search_fields = ('name', 'email', 'public', 'hearts', 'created', 'last_contribution', 'last_access')
+
+    nr_questions.admin_order_field = '_nr_questions'
+    nr_quizes.admin_order_field = '_nr_quizes'
