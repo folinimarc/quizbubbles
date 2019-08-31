@@ -47,7 +47,7 @@ class Question(models.Model):
 
     @property
     def trimmed_question(self):
-        return f'{self.question[:200]}...' if len(self.question) > 10 else str(self.question)
+        return f'{self.question[:200]}...' if len(self.question) > 200 else str(self.question)
 
     def __str__(self):
         return f'Q{self.pk} - {self.question[:10]}'
