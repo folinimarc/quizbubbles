@@ -15,14 +15,14 @@
 <!-- nav -->
 <div class="nav-row row my-4">
     <div class="col-12">
-        <a href="{% url 'login' %}" class="btn btn-outline-light mr-2">Back</a>
+        <a href="{% url 'login' %}" class="btn btn-outline-light mr-2">Back to login</a>
     </div>
 </div>
 <!-- body -->
     <div class="row mt-3">
         <div class="col-12">
             <div class="text-light text-center p-4 d-flex flex-column justify-content-center align-items-center">
-                <h2 class="display-4 mb-3">About QuizBubbles</h2>
+                <h2 class="display-4 mb-3">Contact</h2>
                 {% if captcha_form %}
                 <form class="hide-labels smaller-controls" method="post">
                     {% csrf_token %}

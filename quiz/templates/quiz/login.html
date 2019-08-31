@@ -31,8 +31,12 @@
     <!-- join / create -->
     <div class="col-12">
         <h1 class="mb-2 display-4 text-light text-center border-bottom border-light">Welcome to QuizBubbles</h1>
-        <h4 class="mb-4 display-5 text-light text-center">Create Share Challenge</h4>
-        <a href="{% url 'intro' %}" class="mb-3 d-flex align-items-center text-white justify-content-center"><i class="mr-1 smaller-icon material-icons">help</i><span>Introduction</span></a>
+        <h4 class="mb-3 display-5 text-light text-center">Create Share Challenge</h4>
+        <!-- tutorial / about -->
+        <div class="mb-5 d-flex justify-content-center align-items-center">
+            <a href="{% url 'intro' %}" class="mr-2 btn btn-outline-light btn-mini d-inline-flex align-items-center text-white justify-content-center">What is it about?</a>
+            <a class="btn-mini btn btn-outline-light" href="{% url 'about' %}">Contact</a>
+        </div>
         <!-- flipcard -->
         <div id="flipcard" class="{% if not flipShowJoin %}flipped{% endif %} flip-card">
             <div class="content">
@@ -41,7 +45,7 @@
                     <form class="hide-labels smaller-controls" method="post">
                         {% csrf_token %}
                         {{ join_form|crispy }}
-                        <div class="form-row">
+                        <div class= "form-row">
                             <div class="pr-1 w-50">
                                 <button type="button" class="toggle-card btn btn-outline-light btn-block d-flex justify-content-center align-items-center"><i class="material-icons">loop</i> <span>Create</span></button>
                             </div>
@@ -81,13 +85,4 @@
         {% include 'quiz/includes/public_bubbles_list.html' %}
     </div>
 </div>
-<!-- info -->
-<div class="row my-5">
-    <div class="col-12 text-center">
-        <small>
-            <a class="btn-mini btn btn-outline-light" href="{% url 'about' %}">About QuizBubbles</a>
-        </small>
-    </div>
-</div>
-
 {% endblock %}

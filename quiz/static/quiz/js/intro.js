@@ -1,7 +1,7 @@
 "use strict";
 
 var currentPageIndex = 0;
-var maxPageIndex = 5;
+var maxPageIndex = 7;
 var frontVisible = true;
 var flipCard = document.querySelector('.flip-card');
 

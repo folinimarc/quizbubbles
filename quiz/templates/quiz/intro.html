@@ -17,7 +17,7 @@
 <!-- nav -->
 <div class="nav-row row my-4">
     <div class="col-12">
-        <a href="{% url 'login' %}" class="btn btn-outline-light mr-2">Back</a>
+        <a href="{% url 'login' %}" class="btn btn-outline-light mr-2">Back to login</a>
     </div>
 </div>
 <!-- body -->
@@ -32,7 +32,7 @@
                         <!-- p0 -->
                         <div id="p0">
                             <h3>Welcome stranger</h3>
-                            <p>QuizBubbles is intended for fun and educational purposes, making it easy for everyone to add a bundle of questions and challenge each other in two quiz modes.</p>
+                            <p>QuizBubbles makes it easy and fun to test your knowledge and contribute questions. Ideal as classroom exercise, for company newcomers or having fun with friends.</p>
                             <div>
                                 <button type="button" disabled class="previous-button btn btn-outline-light white-outline">Previous</button>
                                 <button type="button" class="next-button btn btn-outline-light white-outline">Next</button>
@@ -41,7 +41,7 @@
                         <!-- p2 -->
                         <div id="p2" class="d-none">
                             <h3>Add questions</h3>
-                            <p>Once you created your bubble, it's time to add questions. Take your time and enjoy the creativity. Use the settings to change name, password or if your bubble is publicly accessible.</p>
+                            <p>Once you created your bubble, it's time for you and your friends to add questions. Take your time and enjoy the creativity.</p>
                             <button type="button" class="previous-button btn btn-outline-light white-outline">Previous</button>
                             <button type="button" class="next-button btn btn-outline-light white-outline">Next</button>
                         </div>
@@ -49,6 +49,13 @@
                         <div id="p4" class="d-none">
                             <h3>Sprint</h3>
                             <p><b>Sprint</b> selects 12 questions in ascending difficulty and a single wrong answer means game over.</p>
+                            <button type="button" class="previous-button btn btn-outline-light white-outline">Previous</button>
+                            <button type="button" class="next-button btn btn-outline-light white-outline">Next</button>
+                        </div>
+                        <!-- p6 -->
+                        <div id="p6" class="d-none">
+                            <h3>Public bubbles</h3>
+                            <p>Public bubbles allow people to play a quiz without password by just sharing the link. Adding questions still requires a password. Change public accessibility in bubble settings.</p>
                             <button type="button" class="previous-button btn btn-outline-light white-outline">Previous</button>
                             <button type="button" class="next-button btn btn-outline-light white-outline">Next</button>
                         </div>
@@ -65,7 +72,7 @@
                         <!-- p3 -->
                         <div id="p3" class="d-none">
                             <h3>Time to play</h3>
-                            <p>There are two quiz modes to challenge your friends: <b>Sprint</b> and <b>Marathon</b>. Your performance is <b>ranked</b> based on the number of correct answers and the time.</p>
+                            <p>There are two quiz modes: <b>Sprint</b> and <b>Marathon</b>. Your performance is <b>ranked</b> based on the number of correct answers and the time.</p>
                             <button type="button" class="previous-button btn btn-outline-light white-outline">Previous</button>
                             <button type="button" class="next-button btn btn-outline-light white-outline">Next</button>
                         </div>
@@ -75,6 +82,13 @@
                             <p><b>Marathon</b> is all about endurance, providing you with all questions available and counting how many you get right.</p>
                             <button type="button" class="previous-button btn btn-outline-light white-outline">Previous</button>
                             <button type="button" class="next-button btn btn-outline-light white-outline">Next</button>
+                        </div>
+                        <!-- p7 -->
+                        <div id="p7" class="d-none">
+                            <h3>That's all!</h3>
+                            <p>Just give it a try! Feel free to contact us through the About section on the login page.</p>
+                            <button type="button" class="previous-button btn btn-outline-light white-outline">Previous</button>
+                            <a href="{% url 'login' %}" class="next-button btn btn-outline-light white-outline">Back to login</a>
                         </div>
                     </div>
                 </div>
