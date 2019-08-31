@@ -21,6 +21,12 @@ from .forms import *
 from collections import OrderedDict
 
 
+class Intro(View):
+    def get(self, request):
+        ctx = {}
+        return render(request, 'quiz/intro.html', ctx)
+
+
 class About(View):
     def get(self, request):
         ctx = {}
