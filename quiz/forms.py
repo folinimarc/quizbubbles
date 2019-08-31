@@ -67,7 +67,7 @@ class BubbleChangeForm(forms.ModelForm):
             'email': forms.TextInput(attrs={'placeholder': 'Email (public)', 'autocomplete': 'off'}),
             }
         labels = {
-            'public': 'Public QuizBubble'
+            'public': 'Publicly accessible'
         }
 
     def clean(self):
@@ -87,6 +87,10 @@ class BubbleCreateForm(BubbleChangeForm):
     prefix='create'
     class Meta(BubbleChangeForm.Meta):
         fields = ('name', 'email', 'password1', 'password2', 'public', 'captcha')
+        help_texts = {
+            'email': 'Used solely to send you a password\nreset link and let others contact\nyou in case they forgot the password.',
+            'public': 'Your bubble can be accessed without password and thus easily shared via link. Adding questions still requires password. Will be listed in public bubbles list. Can be changed in bubble settings.'
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
